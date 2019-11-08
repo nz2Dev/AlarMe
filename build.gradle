@@ -22,6 +22,22 @@ allprojects {
     }
 }
 
+ext {
+    compileSdk_version = 28
+    targetSdk_version = 28
+    minSdk_version = 19
+    appVersion_name = "0.0"
+    appVersion_code = 1
+
+    appCompat = "androidx.appcompat:appcompat:1.0.2"
+    constraintLayout = "androidx.constraintlayout:constraintlayout:1.1.3"
+
+    testingJUnit = "junit:junit:4.12"
+
+    androidTestingAndroidXRunner = "androidx.test:runner:1.1.1"
+    androidTestingAndroidXEspressoCore = "androidx.test.espresso:espresso-core:3.1.1"
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
