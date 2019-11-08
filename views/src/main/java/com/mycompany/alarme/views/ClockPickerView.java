@@ -31,6 +31,8 @@ public class ClockPickerView extends View {
     private int gradientStartDegree;
     private float gradientRange;
 
+    private Paint boundsArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
     private int radius;
     private int startX;
     private int startY;
@@ -38,6 +40,9 @@ public class ClockPickerView extends View {
     public ClockPickerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         rangeArcPaint.setStyle(Paint.Style.STROKE);
+
+        boundsArcPaint.setStyle(Paint.Style.STROKE);
+        boundsArcPaint.setColor(Color.GRAY);
 
         segmentDivisionPaint.setStyle(Paint.Style.STROKE);
         segmentDivisionPaint.setColor(Color.BLACK);
@@ -72,6 +77,7 @@ public class ClockPickerView extends View {
 
         final int rangeArcStrokeWidth = ((int) (radius * rangeArchStrokeWidthPercentageOfRadius));
         rangeArcPaint.setStrokeWidth(rangeArcStrokeWidth);
+        boundsArcPaint.setStrokeWidth(rangeArcStrokeWidth);
 
         final float halfOfRangeArchStrokeWidget = rangeArcStrokeWidth / 2f;
         // set the circle rect for gradient arc, shrink it by a half of stroke width in order to fit inside view bounds
@@ -112,8 +118,11 @@ public class ClockPickerView extends View {
                     segmentDivisionPaint);
         }
 
+        final float rangeSweepAngle = 360 * gradientRange;
         canvas.rotate(gradientStartDegree, startX, startY);
-        canvas.drawArc(rangeArcRect, 0, 360 * gradientRange, false, rangeArcPaint);
+        canvas.drawArc(rangeArcRect, 0, rangeSweepAngle, false, rangeArcPaint);
+
+        canvas.drawArc(rangeArcRect, rangeSweepAngle, 360 - rangeSweepAngle, false, boundsArcPaint);
     }
 
 }
