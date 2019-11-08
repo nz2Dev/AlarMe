@@ -5,8 +5,10 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -15,6 +17,8 @@ import androidx.annotation.FloatRange;
 import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
 import androidx.core.math.MathUtils;
+
+import static androidx.core.content.ContextCompat.getDrawable;
 
 public class ClockPickerView extends View {
 
@@ -40,6 +44,7 @@ public class ClockPickerView extends View {
     private float gradientRange;
     private Paint rangeArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private @ColorInt int rangeArcStartColor;
+    private Drawable rangeStartDrawable;
     private @ColorInt int rangeArcEndColor;
     private Paint boundsArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private @ColorInt int boundsArcColor;
@@ -62,6 +67,7 @@ public class ClockPickerView extends View {
         typedArray.recycle();
 
         rangeArcPaint.setStyle(Paint.Style.STROKE);
+        rangeStartDrawable = getDrawable(context, R.drawable.ic_android_black_24dp);
 
         boundsArcPaint.setStyle(Paint.Style.STROKE);
         boundsArcPaint.setColor(boundsArcColor);
@@ -113,6 +119,14 @@ public class ClockPickerView extends View {
 
         segmentDivisionEndRadius = radius - (rangeArcStrokeWidth + segmentDivisionOffset);
 
+        int halfHandlerSize = 50;
+        double rangeStartAngle = Math.toRadians(gradientStartDegree);
+        rangeStartDrawable.setBounds(
+                ((int) ((startX + Math.cos(rangeStartAngle) * radius) - halfHandlerSize)),
+                ((int) ((startY + Math.sin(rangeStartAngle) * radius) - halfHandlerSize)),
+                ((int) ((startX + Math.cos(rangeStartAngle) * radius) + halfHandlerSize)),
+                ((int) ((startY + Math.sin(rangeStartAngle) * radius) + halfHandlerSize)));
+
         updateCirclePaintShader();
     }
 
@@ -148,6 +162,9 @@ public class ClockPickerView extends View {
         canvas.drawArc(arcRect, 0, rangeSweepAngle, false, rangeArcPaint);
 
         canvas.drawArc(arcRect, rangeSweepAngle, 360 - rangeSweepAngle, false, boundsArcPaint);
+
+        canvas.rotate(-gradientStartDegree, startX, startY);
+        rangeStartDrawable.draw(canvas);
     }
 
 }
