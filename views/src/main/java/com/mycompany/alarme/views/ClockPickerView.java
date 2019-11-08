@@ -21,12 +21,12 @@ public class ClockPickerView extends View {
     private Paint segmentDivisionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private double segmentDivisionLineSize = 20;
     private int segmentsCount = 12;
-    private int segmentSize = 360 / segmentsCount;
-    private int segmentDivisionOffset = 20;
+    private int segmentDegree = 360 / segmentsCount;
+    private int segmentDivisionOffset = 50;
     private int segmentDivisionEndRadius;
 
     private Paint rangeArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private float rangeArchStrokeWidthPercentageOfRadius = 0.1f;
+    private float rangeArchStrokeWidthPercentageOfRadius = 0.05f;
     private RectF rangeArcRect = new RectF();
     private int gradientStartDegree;
     private float gradientRange;
@@ -38,9 +38,13 @@ public class ClockPickerView extends View {
     public ClockPickerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         rangeArcPaint.setStyle(Paint.Style.STROKE);
+
         segmentDivisionPaint.setStyle(Paint.Style.STROKE);
         segmentDivisionPaint.setColor(Color.BLACK);
-        debugPaint = new Paint(segmentDivisionPaint);
+        segmentDivisionPaint.setStrokeWidth(5);
+
+        debugPaint = new Paint();
+        debugPaint.setStyle(Paint.Style.STROKE);
         debugPaint.setColor(Color.BLACK);
 
         setupGradientShader(0.4f, 270);
@@ -93,10 +97,10 @@ public class ClockPickerView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         // debug draw measured bounds
-        canvas.drawRect(startX - radius, startY - radius, startX + radius - 1, startY + radius - 1, debugPaint);
+        // canvas.drawRect(startX - radius, startY - radius, startX + radius - 1, startY + radius - 1, debugPaint);
 
         for (int segment = 0; segment < segmentsCount; segment++) {
-            double angle = Math.toRadians(segment * segmentSize);
+            double angle = Math.toRadians(segment * segmentDegree);
             double angleSin = Math.sin(angle);
             double angleCos = Math.cos(angle);
 
