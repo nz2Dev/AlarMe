@@ -16,25 +16,29 @@ import androidx.core.math.MathUtils;
 
 public class ClockPickerView extends View {
 
-    private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Paint circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private RectF circleRect = new RectF();
+    private Paint debugPaint;
+
+    private Paint segmentDivisionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private double segmentDivisionLineSize = 20;
+    private int segmentsCount = 12;
+    private int segmentSize = 360 / segmentsCount;
+
+    private Paint rangeArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private float rangeArchStrokeWidthPercentageOfRadius = 0.1f;
+    private RectF rangeArcRect = new RectF();
+    private int gradientStartDegree;
+    private float gradientRange;
+
     private int radius;
     private int startX;
     private int startY;
 
-    private float gradientRange;
-    private int gradientStartDegree;
-    private int circleStrokeSize;
-    private float circleStrokePercentageOfRadius = 0.1f;
-    private Paint debugPaint;
-
     public ClockPickerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-
-        paint.setStyle(Paint.Style.STROKE);
-        circlePaint.setStyle(Paint.Style.STROKE);
-        debugPaint = new Paint(paint);
+        rangeArcPaint.setStyle(Paint.Style.STROKE);
+        segmentDivisionPaint.setStyle(Paint.Style.STROKE);
+        segmentDivisionPaint.setColor(Color.BLACK);
+        debugPaint = new Paint(segmentDivisionPaint);
         debugPaint.setColor(Color.BLACK);
 
         setupGradientShader(0.4f, 270);
@@ -56,15 +60,16 @@ public class ClockPickerView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        radius = Math.min(w, h) / 2;
-        circleStrokeSize = ((int) (radius * circleStrokePercentageOfRadius));
-        circlePaint.setStrokeWidth(circleStrokeSize);
-
         startX = w / 2;
         startY = h / 2;
-        final float halfOfCircleStrokeSize = circleStrokeSize / 2f;
+        radius = Math.min(w, h) / 2;
+
+        final int rangeArcStrokeWidth = ((int) (radius * rangeArchStrokeWidthPercentageOfRadius));
+        rangeArcPaint.setStrokeWidth(rangeArcStrokeWidth);
+
+        final float halfOfCircleStrokeSize = rangeArcStrokeWidth / 2f;
         // set the circle rect for gradient arc, shrink it by a half of stroke size (width) in order to fit inside view bounds
-        circleRect.set(startX - (radius - halfOfCircleStrokeSize),
+        rangeArcRect.set(startX - (radius - halfOfCircleStrokeSize),
                 startY - (radius - halfOfCircleStrokeSize),
                 startX + (radius - halfOfCircleStrokeSize),
                 startY + (radius - halfOfCircleStrokeSize));
@@ -73,7 +78,7 @@ public class ClockPickerView extends View {
     }
 
     private void updateCirclePaintShader() {
-        circlePaint.setShader(new SweepGradient(startX, startY, new int[]{
+        rangeArcPaint.setShader(new SweepGradient(startX, startY, new int[]{
                 Color.BLUE, Color.YELLOW
         }, new float[]{
                 0.0f, gradientRange
@@ -83,26 +88,20 @@ public class ClockPickerView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        final int segmentsCount = 12;
-        final int segmentSize = 360 / segmentsCount;
-        final double lineSize = 20;
-        int x = startX, y = startY;
-
         // debug draw measured bounds
         canvas.drawRect(startX - radius, startY - radius, startX + radius - 1, startY + radius - 1, debugPaint);
 
-        paint.setColor(Color.BLACK);
         for (int segment = 0; segment < segmentsCount; segment++) {
             double angle = Math.toRadians(segment * segmentSize);
             double angleSin = Math.sin(angle);
             double angleCos = Math.cos(angle);
 
-            canvas.drawLine(((float) (x + angleCos * (radius - lineSize))), ((float) (y + angleSin * (radius - lineSize))),
-                    ((float) (x + angleCos * radius)), ((float) (y + angleSin * radius)), paint);
+            canvas.drawLine(((float) (startX + angleCos * (radius - segmentDivisionLineSize))), ((float) (startY + angleSin * (radius - segmentDivisionLineSize))),
+                    ((float) (startX + angleCos * radius)), ((float) (startY + angleSin * radius)), segmentDivisionPaint);
         }
 
         canvas.rotate(gradientStartDegree, startX, startY);
-        canvas.drawArc(circleRect, 0, 360 * gradientRange, false, circlePaint);
+        canvas.drawArc(rangeArcRect, 0, 360 * gradientRange, false, rangeArcPaint);
     }
 
 }
