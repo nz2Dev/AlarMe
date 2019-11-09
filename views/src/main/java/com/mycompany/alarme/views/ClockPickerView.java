@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.graphics.drawable.Drawable;
@@ -22,7 +21,7 @@ import static androidx.core.content.ContextCompat.getDrawable;
 
 public class ClockPickerView extends View {
 
-    public static final float ARC_STROKE_DEFAULT_VALUE = 0.05f;
+    public static final int ARC_STROKE_DEFAULT_VALUE = 20;
     public static final int SEGMENT_DIVISION_DEFAULT_LINE_SIZE = 20;
     public static final int SEGMENT_DIVISION_DEFAULT_OFFSET = 50;
     public static final int SEGMENT_DIVISION_DEFAULT_LINE_WIDTH = 5;
@@ -30,7 +29,7 @@ public class ClockPickerView extends View {
     private Paint debugPaint;
 
     private Paint segmentDivisionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private double segmentDivisionLineSize; // todo convert to percentage value
+    private double segmentDivisionLineLength;
     private @ColorInt int segmentDivisionLineColor;
     private int segmentsCount = 12;
     private int segmentDegree = 360 / segmentsCount;
@@ -39,7 +38,7 @@ public class ClockPickerView extends View {
     private int segmentDivisionLineWidth;
 
     private RectF arcRect = new RectF();
-    private float arcStrokeValue;
+    private int arcStrokeWidth;
     private int gradientStartDegree;
     private float gradientRange;
     private Paint rangeArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -56,14 +55,14 @@ public class ClockPickerView extends View {
     public ClockPickerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         final TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ClockPickerView);
-        arcStrokeValue = typedArray.getFloat(R.styleable.ClockPickerView_clock_arcSize, ARC_STROKE_DEFAULT_VALUE);
+        arcStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.ClockPickerView_clock_arcWidth, ARC_STROKE_DEFAULT_VALUE);
         rangeArcStartColor = typedArray.getColor(R.styleable.ClockPickerView_clock_rangeArcStartColor, Color.BLUE);
         rangeArcEndColor = typedArray.getColor(R.styleable.ClockPickerView_clock_rangeArcEndColor, Color.YELLOW);
         boundsArcColor = typedArray.getColor(R.styleable.ClockPickerView_clock_boundsArcColor, Color.GRAY);
-        segmentDivisionLineSize = typedArray.getDimensionPixelSize(R.styleable.ClockPickerView_clock_segmentsDivisionLineSize, SEGMENT_DIVISION_DEFAULT_LINE_SIZE);
-        segmentDivisionOffset = typedArray.getInt(R.styleable.ClockPickerView_clock_segmentsDivisionOffset, SEGMENT_DIVISION_DEFAULT_OFFSET);
+        segmentDivisionLineLength = typedArray.getDimensionPixelSize(R.styleable.ClockPickerView_clock_segmentsDivisionLineLength, SEGMENT_DIVISION_DEFAULT_LINE_SIZE);
+        segmentDivisionOffset = typedArray.getDimensionPixelSize(R.styleable.ClockPickerView_clock_segmentsDivisionOffset, SEGMENT_DIVISION_DEFAULT_OFFSET);
         segmentDivisionLineColor = typedArray.getColor(R.styleable.ClockPickerView_clock_segmentsDivisionLineColor, Color.GRAY);
-        segmentDivisionLineWidth = typedArray.getInt(R.styleable.ClockPickerView_clock_segmentsDivisionLineWidth, SEGMENT_DIVISION_DEFAULT_LINE_WIDTH);
+        segmentDivisionLineWidth = typedArray.getDimensionPixelSize(R.styleable.ClockPickerView_clock_segmentsDivisionLineWidth, SEGMENT_DIVISION_DEFAULT_LINE_WIDTH);
         typedArray.recycle();
 
         rangeArcPaint.setStyle(Paint.Style.STROKE);
@@ -106,18 +105,17 @@ public class ClockPickerView extends View {
         startY = h / 2;
         radius = Math.min(w, h) / 2;
 
-        final int rangeArcStrokeWidth = ((int) (radius * arcStrokeValue));
-        rangeArcPaint.setStrokeWidth(rangeArcStrokeWidth);
-        boundsArcPaint.setStrokeWidth(rangeArcStrokeWidth);
+        rangeArcPaint.setStrokeWidth(arcStrokeWidth);
+        boundsArcPaint.setStrokeWidth(arcStrokeWidth);
 
-        final float halfOfRangeArchStrokeWidget = rangeArcStrokeWidth / 2f;
         // set the circle rect for gradient arc, shrink it by a half of stroke width in order to fit inside view bounds
-        arcRect.set(startX - (radius - halfOfRangeArchStrokeWidget),
-                startY - (radius - halfOfRangeArchStrokeWidget),
-                startX + (radius - halfOfRangeArchStrokeWidget),
-                startY + (radius - halfOfRangeArchStrokeWidget));
+        final float halfOfArchStrokeWidget = arcStrokeWidth / 2f;
+        arcRect.set(startX - (radius - halfOfArchStrokeWidget),
+                startY - (radius - halfOfArchStrokeWidget),
+                startX + (radius - halfOfArchStrokeWidget),
+                startY + (radius - halfOfArchStrokeWidget));
 
-        segmentDivisionEndRadius = radius - (rangeArcStrokeWidth + segmentDivisionOffset);
+        segmentDivisionEndRadius = radius - (arcStrokeWidth + segmentDivisionOffset);
 
         int halfHandlerSize = 50;
         double rangeStartAngle = Math.toRadians(gradientStartDegree);
@@ -150,8 +148,8 @@ public class ClockPickerView extends View {
             double angleCos = Math.cos(angle);
 
             canvas.drawLine(
-                    ((float) (startX + angleCos * (segmentDivisionEndRadius - segmentDivisionLineSize))),
-                    ((float) (startY + angleSin * (segmentDivisionEndRadius - segmentDivisionLineSize))),
+                    ((float) (startX + angleCos * (segmentDivisionEndRadius - segmentDivisionLineLength))),
+                    ((float) (startY + angleSin * (segmentDivisionEndRadius - segmentDivisionLineLength))),
                     ((float) (startX + angleCos * segmentDivisionEndRadius)),
                     ((float) (startY + angleSin * segmentDivisionEndRadius)),
                     segmentDivisionPaint);
