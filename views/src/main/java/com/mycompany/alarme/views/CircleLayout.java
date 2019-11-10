@@ -188,10 +188,11 @@ public class CircleLayout extends ViewGroup {
         for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
             final View child = getChildAt(childIndex);
             final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
-            final int childOuterRadius = (int) Math.sqrt(child.getMeasuredWidth() * child.getMeasuredWidth() + child.getMeasuredHeight() * child.getMeasuredHeight());
-            final float childCenterVectorLength = radius - childOuterRadius;
-            final int childCenterX = (int) (startX + Math.cos(childParams.angle) * childCenterVectorLength);
-            final int childCenterY = (int) (startY + Math.sin(childParams.angle) * childCenterVectorLength);
+            // final int childOuterRadius = (int) Math.sqrt(child.getMeasuredWidth() * child.getMeasuredWidth() + child.getMeasuredHeight() * child.getMeasuredHeight()) / 2;
+            final int childInnerRadius = Math.min(child.getMeasuredWidth(), child.getMeasuredHeight()) / 2;
+            final float childToCenterVectorLength = radius - /*childOuterRadius*/ childInnerRadius;
+            final int childCenterX = (int) (startX + Math.cos(childParams.angle) * childToCenterVectorLength);
+            final int childCenterY = (int) (startY + Math.sin(childParams.angle) * childToCenterVectorLength);
 
             child.layout(childCenterX - child.getMeasuredWidth() / 2, childCenterY - child.getMeasuredHeight() / 2,
                     childCenterX + child.getMeasuredWidth() / 2, childCenterY + child.getMeasuredHeight() / 2);
