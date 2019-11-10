@@ -17,8 +17,6 @@
         android:layout_marginBottom="32dp"
         android:minWidth="100dp"
         android:minHeight="100dp"
-        android:paddingLeft="32dp"
-        android:paddingRight="32dp"
         app:clock_arcWidth="10dp"
         app:clock_boundsArcColor="#4A01217E"
         app:clock_rangeArcEndColor="#FF8E05"
