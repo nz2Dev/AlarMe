@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.ColorInt;
@@ -86,40 +87,78 @@ public class CircleLayout extends ViewGroup {
         updateCirclePaintShader();
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    private void unsued() {
         // tries to apply some measuring logic to specific child, taking into account only our measure specs
         // uses getChildMeasureSpec() to get measure spec for specific view
-        measureChild(child, parentWidthMeasureSpec, parentHeightMeasureSpec); // method, calls child.measure()
+        // fixme measureChild(child, parentWidthMeasureSpec, parentHeightMeasureSpec); // method, calls child.measure()
         // iterate over all views, and apply above method for each of them, ignoring views that has been gone.
-        measureChildren(widthMeasureSpec, heightMeasureSpec);
+        // fixme measureChildren(widthMeasureSpec, heightMeasureSpec);
         // tries to apply some measuring logic to specific child,
         // taking into account our measure specs and width/height that the child can fit into,
         // uses getChildMeasureSpec() to get measure spec for specific view
-        measureChildWithMargins(child, parentWidthMeasureSpec, widthUsed, parentHeightMeasureSpec, heightUser);
+        // fixme measureChildWithMargins(child, parentWidthMeasureSpec, widthUsed, parentHeightMeasureSpec, heightUser);
         // all methods above is a predefined default logic that we should write ourselves.
+        // _fixme_ is only used there to highlight names
 
 
         // tries to find out measureSpec for child using our measureSpec and its layoutParams
         // and take into account already used space (padding, previous calculation)
-        getChildMeasureSpec(spec, padding, childDimension); // :int, MeasureSpec integer for the child to pass into child.measure()
+        // fixme getChildMeasureSpec(spec, padding, childDimension); // :int, MeasureSpec integer for the child to pass into child.measure()
         // so I would name params: spec, allocatedSize, sizeDeclaredInLayoutParamsOrWantedSize.
         // This method will be used after calculation of childDimension our from layoutParams and allocatedSize.
 
         // util method for final calculations of our size
         // tries to fit size passed to the params, will get bigger whenever possible
-        getDefaultSize(size, measureSpec); // :int, Size converted if needed by imposed measure spec constrain
+        // fixme getDefaultSize(size, measureSpec); // :int, Size converted if needed by imposed measure spec constrain
         // can be used if needed
 
         // util for combining two integers bits (Mode and Size)
-        MeasureSpec.makeMeasureSpec(size, mode); // :int, MeasureSpec
+        // fixme MeasureSpec.makeMeasureSpec(size, mode); // :int, MeasureSpec
         // can be used if needed
 
         // tries to resolve our final size using calculated value and parent constraints,
         // child measure state should represent merged state of all children if any of them has such.
-        resolveSizeAndState(size, measureSpec, childMeasuredState); // :int, resolved Size & State according to parent constraints with optional State bits.
-        resolveSize(size, measureSpec); // :int, same as above, but without State information
+        // fixme resolveSizeAndState(size, measureSpec, childMeasuredState); // :int, resolved Size & State according to parent constraints with optional State bits.
+        // fixme resolveSize(size, measureSpec); // :int, same as above, but without State information
         // should be used for setMeasureDimension on ourselves.
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        measureChildrenInternal(widthMeasureSpec, heightMeasureSpec);
+
+        // can also take into account and use max(getSuggestedMinWidth(), getChildMaxMeasuredSize() * 2)
+        setMeasuredDimension(resolveSize(getChildMaxMeasuredSize() * 2, widthMeasureSpec),
+                resolveSize(getChildMaxMeasuredSize() * 2, heightMeasureSpec));
+    }
+
+    private int getChildMaxMeasuredSize() {
+        int maxSize = 0;
+        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
+            View childAt = getChildAt(childIndex);
+            maxSize = Math.max(maxSize, Math.max(childAt.getMeasuredWidth(), childAt.getMeasuredHeight()));
+        }
+        return maxSize;
+    }
+
+    private void measureChildrenInternal(int widthMeasureSpec, int heightMeasureSpec) {
+        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
+            View child = getChildAt(childIndex);
+            measureChildInternal(child, widthMeasureSpec, heightMeasureSpec);
+        }
+    }
+
+    private void measureChildInternal(View child, int widthMeasureSpec, int heightMeasureSpec) {
+        int radiusSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+        // child offset should decrees this radius size value
+
+        int constrainedWidthMeasureSpec = MeasureSpec.makeMeasureSpec(radiusSize, MeasureSpec.getMode(widthMeasureSpec));
+        int childWidthMeasureSpec = getChildMeasureSpec(constrainedWidthMeasureSpec, 0, child.getLayoutParams().width);
+
+        int constrainedHeightMeasureSpec = MeasureSpec.makeMeasureSpec(radiusSize, MeasureSpec.getMode(heightMeasureSpec));
+        int childHeightMeasureSpec = getChildMeasureSpec(constrainedHeightMeasureSpec, 0, child.getLayoutParams().height);
+
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
     @Override
@@ -146,7 +185,17 @@ public class CircleLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        // todo implement.
+        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
+            final View child = getChildAt(childIndex);
+            final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
+            final int childOuterRadius = (int) Math.sqrt(child.getMeasuredWidth() * child.getMeasuredWidth() + child.getMeasuredHeight() * child.getMeasuredHeight());
+            final float childCenterVectorLength = radius - childOuterRadius;
+            final int childCenterX = (int) (startX + Math.cos(childParams.angle) * childCenterVectorLength);
+            final int childCenterY = (int) (startY + Math.sin(childParams.angle) * childCenterVectorLength);
+
+            child.layout(childCenterX - child.getMeasuredWidth() / 2, childCenterY - child.getMeasuredHeight() / 2,
+                    childCenterX + child.getMeasuredWidth() / 2, childCenterY + child.getMeasuredHeight() / 2);
+        }
     }
 
     @Override
@@ -154,6 +203,7 @@ public class CircleLayout extends ViewGroup {
         // debug draw measured bounds
         // canvas.drawRect(startX - radius, startY - radius, startX + radius - 1, startY + radius - 1, debugPaint);
 
+        canvas.save();
         for (int segment = 0; segment < segmentsCount; segment++) {
             double angle = Math.toRadians(segment * segmentDegree);
             double angleSin = Math.sin(angle);
@@ -172,6 +222,7 @@ public class CircleLayout extends ViewGroup {
         canvas.drawArc(arcRect, 0, rangeSweepAngle, false, rangeArcPaint);
 
         canvas.drawArc(arcRect, rangeSweepAngle, 360 - rangeSweepAngle, false, boundsArcPaint);
+        canvas.restore();
     }
 
     private void updateCirclePaintShader() {
@@ -194,38 +245,33 @@ public class CircleLayout extends ViewGroup {
 
     @Override
     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
-        if (p instanceof MarginLayoutParams) {
-            return new LayoutParams((MarginLayoutParams) p);
-        } else {
-            return new LayoutParams(p);
-        }
+        return new LayoutParams(p);
     }
 
     @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
-        return super.generateDefaultLayoutParams();
+        return new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
-    public static class LayoutParams extends MarginLayoutParams {
+    public static class LayoutParams extends ViewGroup.LayoutParams {
 
         private int degree;
+        private double angle;
 
-        public LayoutParams(Context c, AttributeSet attrs) {
+        private LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
             final TypedArray typedArray = c.obtainStyledAttributes(attrs, R.styleable.CircleLayout_Layout);
             degree = typedArray.getInteger(R.styleable.CircleLayout_Layout_layout_degree, 0);
             typedArray.recycle();
+
+            angle = Math.toRadians(degree);
         }
 
-        public LayoutParams(int width, int height) {
+        private LayoutParams(int width, int height) {
             super(width, height);
         }
 
-        public LayoutParams(MarginLayoutParams source) {
-            super(source);
-        }
-
-        public LayoutParams(ViewGroup.LayoutParams source) {
+        private LayoutParams(ViewGroup.LayoutParams source) {
             super(source);
         }
     }
