@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
 
-    <com.mycompany.alarme.views.ClockPickerView
+    <com.mycompany.alarme.views.CircleLayout
         android:id="@+id/clockPickerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -23,12 +23,28 @@
         app:clock_boundsArcColor="#4A01217E"
         app:clock_rangeArcEndColor="#FF8E05"
         app:clock_rangeArcStartColor="#291DC9"
+        app:clock_rangeStartDrawable="?selectableItemBackground"
         app:clock_segmentsDivisionLineColor="#CD116BC9"
         app:clock_segmentsDivisionLineLength="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints" >
+
+<!--        <View-->
+<!--            android:id="@+id/context_drawer_a"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_role="ContextDrawer"/>-->
+
+<!--        <View-->
+<!--            android:id="@+id/child_one"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_role="Handler"-->
+<!--            app:layout_contextParams="@style/ContextParams.ParamsA"/>-->
+
+    </com.mycompany.alarme.views.CircleLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

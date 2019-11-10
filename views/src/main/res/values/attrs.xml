@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="ClockPickerView">
+    <declare-styleable name="CircleLayout">
         <attr name="clock_arcWidth" format="dimension|reference" />
         <attr name="clock_rangeArcStartColor" format="color|reference" />
         <attr name="clock_rangeArcEndColor" format="color|reference" />
@@ -9,5 +9,9 @@
         <attr name="clock_segmentsDivisionLineWidth" format="dimension|reference" />
         <attr name="clock_segmentsDivisionLineColor" format="color|reference" />
         <attr name="clock_segmentsDivisionOffset" format="dimension|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="CircleLayout_Layout">
+        <attr name="layout_degree" format="integer|reference" />
     </declare-styleable>
 </resources>
