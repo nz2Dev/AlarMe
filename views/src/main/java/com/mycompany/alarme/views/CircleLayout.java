@@ -149,7 +149,7 @@ public class CircleLayout extends ViewGroup {
     }
 
     private void measureChildInternal(View child, int widthMeasureSpec, int heightMeasureSpec) {
-        int radiusSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+        int radiusSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec)) / 2;
         // child offset should decrees this radius size value
 
         int constrainedWidthMeasureSpec = MeasureSpec.makeMeasureSpec(radiusSize, MeasureSpec.getMode(widthMeasureSpec));
