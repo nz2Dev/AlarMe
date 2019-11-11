@@ -46,6 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_degree="0"
+            app:layout_handlerContextParams="@style/DrawerParams.Robot.A"
             app:srcCompat="@drawable/ic_android_black_24dp" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -53,6 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_degree="45"
+            app:layout_handlerContextParams="@style/DrawerParams.Robot.B"
             app:srcCompat="@drawable/ic_android_black_24dp" />
 
         <!--        <View-->
