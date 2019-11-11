@@ -126,23 +126,33 @@ public class CircleLayout extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         measureChildrenByRadiusStrategy(widthMeasureSpec, heightMeasureSpec, ViewRole.Handler);
+        measureChildrenByBoxStrategy(widthMeasureSpec, heightMeasureSpec, ViewRole.ContextDrawer);
+        measureChildrenByBoxStrategy(widthMeasureSpec, heightMeasureSpec, ViewRole.Layer);
 
         // can also take into account and use max(getSuggestedMinWidth(), getMaxMeasuredChildSize() * 2)
         setMeasuredDimension(resolveSize(getMaxMeasuredChildSize(ViewRole.Handler) * 2, widthMeasureSpec),
                 resolveSize(getMaxMeasuredChildSize(ViewRole.Handler) * 2, heightMeasureSpec));
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private int getMaxMeasuredChildSize(ViewRole viewRole) {
-        int maxSize = 0;
+    private void measureChildrenByBoxStrategy(int widthMeasureSpec, int heightMeasureSpec, ViewRole viewRole) {
         for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
-            View childAt = getChildAt(childIndex);
-            final CircleLayout.LayoutParams childParams = (LayoutParams) childAt.getLayoutParams();
-            if (childParams.role.equals(viewRole)) {
-                maxSize = Math.max(maxSize, Math.max(childAt.getMeasuredWidth(), childAt.getMeasuredHeight()));
+            View child = getChildAt(childIndex);
+            if (((LayoutParams) child.getLayoutParams()).role.equals(viewRole)) {
+                measureChildByBoxStrategy(child, widthMeasureSpec, heightMeasureSpec);
             }
         }
-        return maxSize;
+    }
+
+    private void measureChildByBoxStrategy(View child, int widthMeasureSpec, int heightMeasureSpec) {
+        int minSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+
+        int constrainedWidthMeasureSpec = MeasureSpec.makeMeasureSpec(minSize, MeasureSpec.getMode(widthMeasureSpec));
+        int childWidthMeasureSpec = getChildMeasureSpec(constrainedWidthMeasureSpec, /*todo support padding*/0, child.getLayoutParams().width);
+
+        int constrainedHeightMeasureSpec = MeasureSpec.makeMeasureSpec(minSize, MeasureSpec.getMode(heightMeasureSpec));
+        int childHeightMeasureSpec = getChildMeasureSpec(constrainedHeightMeasureSpec, 0, child.getLayoutParams().height);
+
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -160,12 +170,25 @@ public class CircleLayout extends ViewGroup {
         // child offset should decrees this radius size value
 
         int constrainedWidthMeasureSpec = MeasureSpec.makeMeasureSpec(radiusSize, MeasureSpec.getMode(widthMeasureSpec));
-        int childWidthMeasureSpec = getChildMeasureSpec(constrainedWidthMeasureSpec, 0, child.getLayoutParams().width);
+        int childWidthMeasureSpec = getChildMeasureSpec(constrainedWidthMeasureSpec, /*todo support padding*/0, child.getLayoutParams().width);
 
         int constrainedHeightMeasureSpec = MeasureSpec.makeMeasureSpec(radiusSize, MeasureSpec.getMode(heightMeasureSpec));
         int childHeightMeasureSpec = getChildMeasureSpec(constrainedHeightMeasureSpec, 0, child.getLayoutParams().height);
 
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private int getMaxMeasuredChildSize(ViewRole viewRole) {
+        int maxSize = 0;
+        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
+            View childAt = getChildAt(childIndex);
+            final CircleLayout.LayoutParams childParams = (LayoutParams) childAt.getLayoutParams();
+            if (childParams.role.equals(viewRole)) {
+                maxSize = Math.max(maxSize, Math.max(childAt.getMeasuredWidth(), childAt.getMeasuredHeight()));
+            }
+        }
+        return maxSize;
     }
 
     @Override
@@ -193,6 +216,8 @@ public class CircleLayout extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         layoutChildrenByRadiusStrategy(ViewRole.Handler);
+        layoutChildrenByBoxStrategy(ViewRole.ContextDrawer);
+        layoutChildrenByBoxStrategy(ViewRole.Layer);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -215,6 +240,20 @@ public class CircleLayout extends ViewGroup {
 
         child.layout(childCenterX - child.getMeasuredWidth() / 2, childCenterY - child.getMeasuredHeight() / 2,
                 childCenterX + child.getMeasuredWidth() / 2, childCenterY + child.getMeasuredHeight() / 2);
+    }
+
+    private void layoutChildrenByBoxStrategy(ViewRole viewRole) {
+        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
+            final View child = getChildAt(childIndex);
+            if (((LayoutParams) child.getLayoutParams()).role.equals(viewRole)) {
+                layoutChildByBoxStrategy(child);
+            }
+        }
+    }
+
+    private void layoutChildByBoxStrategy(View child) {
+        child.layout(startX - child.getMeasuredWidth() / 2, startY - child.getMeasuredHeight() / 2,
+                startX + child.getMeasuredWidth() / 2, startY + child.getMeasuredHeight() / 2);
     }
 
     @Override
