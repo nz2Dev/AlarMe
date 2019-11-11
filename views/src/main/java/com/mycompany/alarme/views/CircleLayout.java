@@ -125,30 +125,37 @@ public class CircleLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        measureChildrenInternal(widthMeasureSpec, heightMeasureSpec);
+        measureChildrenByRadiusStrategy(widthMeasureSpec, heightMeasureSpec, ViewRole.Handler);
 
-        // can also take into account and use max(getSuggestedMinWidth(), getChildMaxMeasuredSize() * 2)
-        setMeasuredDimension(resolveSize(getChildMaxMeasuredSize() * 2, widthMeasureSpec),
-                resolveSize(getChildMaxMeasuredSize() * 2, heightMeasureSpec));
+        // can also take into account and use max(getSuggestedMinWidth(), getMaxMeasuredChildSize() * 2)
+        setMeasuredDimension(resolveSize(getMaxMeasuredChildSize(ViewRole.Handler) * 2, widthMeasureSpec),
+                resolveSize(getMaxMeasuredChildSize(ViewRole.Handler) * 2, heightMeasureSpec));
     }
 
-    private int getChildMaxMeasuredSize() {
+    @SuppressWarnings("SameParameterValue")
+    private int getMaxMeasuredChildSize(ViewRole viewRole) {
         int maxSize = 0;
         for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
             View childAt = getChildAt(childIndex);
-            maxSize = Math.max(maxSize, Math.max(childAt.getMeasuredWidth(), childAt.getMeasuredHeight()));
+            final CircleLayout.LayoutParams childParams = (LayoutParams) childAt.getLayoutParams();
+            if (childParams.role.equals(viewRole)) {
+                maxSize = Math.max(maxSize, Math.max(childAt.getMeasuredWidth(), childAt.getMeasuredHeight()));
+            }
         }
         return maxSize;
     }
 
-    private void measureChildrenInternal(int widthMeasureSpec, int heightMeasureSpec) {
+    @SuppressWarnings("SameParameterValue")
+    private void measureChildrenByRadiusStrategy(int widthMeasureSpec, int heightMeasureSpec, ViewRole viewRoleToMeasure) {
         for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
             View child = getChildAt(childIndex);
-            measureChildInternal(child, widthMeasureSpec, heightMeasureSpec);
+            if (((LayoutParams) child.getLayoutParams()).role.equals(viewRoleToMeasure)) {
+                measureChildByRadiusStrategy(child, widthMeasureSpec, heightMeasureSpec);
+            }
         }
     }
 
-    private void measureChildInternal(View child, int widthMeasureSpec, int heightMeasureSpec) {
+    private void measureChildByRadiusStrategy(View child, int widthMeasureSpec, int heightMeasureSpec) {
         int radiusSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec)) / 2;
         // child offset should decrees this radius size value
 
@@ -185,18 +192,29 @@ public class CircleLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        layoutChildrenByRadiusStrategy(ViewRole.Handler);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void layoutChildrenByRadiusStrategy(ViewRole viewRole) {
         for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
             final View child = getChildAt(childIndex);
-            final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
-            // final int childOuterRadius = (int) Math.sqrt(child.getMeasuredWidth() * child.getMeasuredWidth() + child.getMeasuredHeight() * child.getMeasuredHeight()) / 2;
-            final int childInnerRadius = Math.min(child.getMeasuredWidth(), child.getMeasuredHeight()) / 2;
-            final float childToCenterVectorLength = radius - /*childOuterRadius*/ childInnerRadius;
-            final int childCenterX = (int) (startX + Math.cos(childParams.angle) * childToCenterVectorLength);
-            final int childCenterY = (int) (startY + Math.sin(childParams.angle) * childToCenterVectorLength);
-
-            child.layout(childCenterX - child.getMeasuredWidth() / 2, childCenterY - child.getMeasuredHeight() / 2,
-                    childCenterX + child.getMeasuredWidth() / 2, childCenterY + child.getMeasuredHeight() / 2);
+            if (((LayoutParams) child.getLayoutParams()).role.equals(viewRole)) {
+                layoutChildByRadiusStrategy(child);
+            }
         }
+    }
+
+    private void layoutChildByRadiusStrategy(View child) {
+        final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
+        // final int childOuterRadius = (int) Math.sqrt(child.getMeasuredWidth() * child.getMeasuredWidth() + child.getMeasuredHeight() * child.getMeasuredHeight()) / 2;
+        final int childInnerRadius = Math.min(child.getMeasuredWidth(), child.getMeasuredHeight()) / 2;
+        final float childToCenterVectorLength = radius - /*childOuterRadius*/ childInnerRadius;
+        final int childCenterX = (int) (startX + Math.cos(childParams.angle) * childToCenterVectorLength);
+        final int childCenterY = (int) (startY + Math.sin(childParams.angle) * childToCenterVectorLength);
+
+        child.layout(childCenterX - child.getMeasuredWidth() / 2, childCenterY - child.getMeasuredHeight() / 2,
+                childCenterX + child.getMeasuredWidth() / 2, childCenterY + child.getMeasuredHeight() / 2);
     }
 
     @Override
@@ -254,15 +272,23 @@ public class CircleLayout extends ViewGroup {
         return new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
+    public enum ViewRole {
+        Layer,
+        Handler,
+        ContextDrawer
+    }
+
     public static class LayoutParams extends ViewGroup.LayoutParams {
 
         private int degree;
         private double angle;
+        private ViewRole role;
 
         private LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
             final TypedArray typedArray = c.obtainStyledAttributes(attrs, R.styleable.CircleLayout_Layout);
             degree = typedArray.getInteger(R.styleable.CircleLayout_Layout_layout_degree, 0);
+            role = ViewRole.values()[typedArray.getInt(R.styleable.CircleLayout_Layout_layout_role, ViewRole.Handler.ordinal())];
             typedArray.recycle();
 
             angle = Math.toRadians(degree);
