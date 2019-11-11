@@ -88,11 +88,32 @@ public class CircleLayout extends ViewGroup {
     }
 
     @Override
+    public void onViewAdded(View child) {
+        super.onViewAdded(child);
+        if (getChildRole(child).equals(ViewRole.ContextDrawer)) {
+            if (!(child instanceof CircleContextDrawer)) {
+                throw new RuntimeException(String.format("View with role %s should implement %s interface", ViewRole.ContextDrawer, CircleContextDrawer.class));
+            }
+        }
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
+            final View childAt = getChildAt(childIndex);
+            if (getChildRole(childAt).equals(ViewRole.ContextDrawer)) {
+                // check inside onViewAdded ensures that view with ContextDrawer role has proper type
+                ((CircleContextDrawer) childAt).recordChildrenInfo(this);
+            }
+        }
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
             final View child = getChildAt(childIndex);
-            final ViewRole viewRole = ((LayoutParams) child.getLayoutParams()).role;
-            switch (viewRole) {
+            switch (getChildRole(child)) {
                 case Handler:
                     measureChildByRadiusStrategy(child, widthMeasureSpec, heightMeasureSpec);
                     break;
@@ -172,8 +193,7 @@ public class CircleLayout extends ViewGroup {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
             final View child = getChildAt(childIndex);
-            final ViewRole viewRole = ((LayoutParams) child.getLayoutParams()).role;
-            switch (viewRole) {
+            switch (getChildRole(child)) {
                 case Handler:
                     layoutChildByRadiusStrategy(child);
                     break;
@@ -255,6 +275,10 @@ public class CircleLayout extends ViewGroup {
     @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+    private ViewRole getChildRole(View child) {
+        return ((LayoutParams) child.getLayoutParams()).role;
     }
 
     public enum ViewRole {
