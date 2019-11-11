@@ -15,11 +15,11 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
 import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 import androidx.core.math.MathUtils;
 
 public class CircleLayout extends ViewGroup {
 
-    public static final int ARC_STROKE_DEFAULT_VALUE = 20;
     public static final int SEGMENT_DIVISION_DEFAULT_LINE_SIZE = 20;
     public static final int SEGMENT_DIVISION_DEFAULT_OFFSET = 50;
     public static final int SEGMENT_DIVISION_DEFAULT_LINE_WIDTH = 5;
@@ -35,16 +35,6 @@ public class CircleLayout extends ViewGroup {
     private int segmentDivisionEndRadius;
     private int segmentDivisionLineWidth;
 
-    private RectF arcRect = new RectF();
-    private int arcStrokeWidth;
-    private int gradientStartDegree;
-    private float gradientRange;
-    private Paint rangeArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private @ColorInt int rangeArcStartColor;
-    private @ColorInt int rangeArcEndColor;
-    private Paint boundsArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private @ColorInt int boundsArcColor;
-
     private int radius;
     private int startX;
     private int startY;
@@ -52,19 +42,11 @@ public class CircleLayout extends ViewGroup {
     public CircleLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         final TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CircleLayout);
-        arcStrokeWidth = typedArray.getDimensionPixelSize(R.styleable.CircleLayout_clock_arcWidth, ARC_STROKE_DEFAULT_VALUE);
-        rangeArcStartColor = typedArray.getColor(R.styleable.CircleLayout_clock_rangeArcStartColor, Color.BLUE);
-        rangeArcEndColor = typedArray.getColor(R.styleable.CircleLayout_clock_rangeArcEndColor, Color.YELLOW);
-        boundsArcColor = typedArray.getColor(R.styleable.CircleLayout_clock_boundsArcColor, Color.GRAY);
         segmentDivisionLineLength = typedArray.getDimensionPixelSize(R.styleable.CircleLayout_clock_segmentsDivisionLineLength, SEGMENT_DIVISION_DEFAULT_LINE_SIZE);
         segmentDivisionOffset = typedArray.getDimensionPixelSize(R.styleable.CircleLayout_clock_segmentsDivisionOffset, SEGMENT_DIVISION_DEFAULT_OFFSET);
         segmentDivisionLineColor = typedArray.getColor(R.styleable.CircleLayout_clock_segmentsDivisionLineColor, Color.GRAY);
         segmentDivisionLineWidth = typedArray.getDimensionPixelSize(R.styleable.CircleLayout_clock_segmentsDivisionLineWidth, SEGMENT_DIVISION_DEFAULT_LINE_WIDTH);
         typedArray.recycle();
-
-        rangeArcPaint.setStyle(Paint.Style.STROKE);
-        boundsArcPaint.setStyle(Paint.Style.STROKE);
-        boundsArcPaint.setColor(boundsArcColor);
 
         segmentDivisionPaint.setStyle(Paint.Style.STROKE);
         segmentDivisionPaint.setColor(segmentDivisionLineColor);
@@ -75,16 +57,7 @@ public class CircleLayout extends ViewGroup {
         debugPaint.setColor(Color.BLACK);
 
         setWillNotDraw(false);
-        updateCirclePaintShader();
-        if (isInEditMode()) {
-            setupGradientShader(0.4f, 270);
-        }
-    }
 
-    public void setupGradientShader(@FloatRange(from = 0f, to = 1f) float range, @IntRange(from = 0, to = 360) int gradientStart) {
-        gradientRange = MathUtils.clamp(range, 0, 1);
-        gradientStartDegree = gradientStart;
-        updateCirclePaintShader();
     }
 
     @Override
@@ -174,19 +147,7 @@ public class CircleLayout extends ViewGroup {
         startY = h / 2;
         radius = Math.min(w, h) / 2;
 
-        rangeArcPaint.setStrokeWidth(arcStrokeWidth);
-        boundsArcPaint.setStrokeWidth(arcStrokeWidth);
-
-        // set the circle rect for gradient arc, shrink it by a half of stroke width in order to fit inside view bounds
-        final float halfOfArchStrokeWidget = arcStrokeWidth / 2f;
-        arcRect.set(startX - (radius - halfOfArchStrokeWidget),
-                startY - (radius - halfOfArchStrokeWidget),
-                startX + (radius - halfOfArchStrokeWidget),
-                startY + (radius - halfOfArchStrokeWidget));
-
-        segmentDivisionEndRadius = radius - (arcStrokeWidth + segmentDivisionOffset);
-
-        updateCirclePaintShader();
+        segmentDivisionEndRadius = radius - segmentDivisionOffset;
     }
 
     @Override
@@ -240,21 +201,7 @@ public class CircleLayout extends ViewGroup {
                     ((float) (startY + angleSin * segmentDivisionEndRadius)),
                     segmentDivisionPaint);
         }
-
-        final float rangeSweepAngle = 360 * gradientRange;
-        canvas.rotate(gradientStartDegree, startX, startY);
-        canvas.drawArc(arcRect, 0, rangeSweepAngle, false, rangeArcPaint);
-
-        canvas.drawArc(arcRect, rangeSweepAngle, 360 - rangeSweepAngle, false, boundsArcPaint);
         canvas.restore();
-    }
-
-    private void updateCirclePaintShader() {
-        rangeArcPaint.setShader(new SweepGradient(startX, startY, new int[]{
-                rangeArcStartColor, rangeArcEndColor
-        }, new float[]{
-                0.0f, gradientRange
-        }));
     }
 
     @Override
@@ -293,14 +240,34 @@ public class CircleLayout extends ViewGroup {
         private double angle;
         private ViewRole role;
 
+        /**
+         * Specify the id to the style that contains {@link CircleContextDrawer}
+         * attributes items. Only applicable for views with {@link ViewRole#Handler} role
+         */
+        @StyleRes
+        public int drawerParamsStyleId;
+
         private LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
             final TypedArray typedArray = c.obtainStyledAttributes(attrs, R.styleable.CircleLayout_Layout);
             degree = typedArray.getInteger(R.styleable.CircleLayout_Layout_layout_degree, 0);
             role = ViewRole.values()[typedArray.getInt(R.styleable.CircleLayout_Layout_layout_role, ViewRole.Handler.ordinal())];
+            drawerParamsStyleId = typedArray.getResourceId(R.styleable.CircleLayout_Layout_layout_handlerContextParams, 0);
             typedArray.recycle();
 
             angle = Math.toRadians(degree);
+        }
+
+        public int getDegree() {
+            return degree;
+        }
+
+        public double getAngle() {
+            return angle;
+        }
+
+        public ViewRole getRole() {
+            return role;
         }
 
         private LayoutParams(int width, int height) {

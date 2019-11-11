@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CircleLayout">
-        <attr name="clock_arcWidth" format="dimension|reference" />
-        <attr name="clock_rangeArcStartColor" format="color|reference" />
-        <attr name="clock_rangeArcEndColor" format="color|reference" />
-        <attr name="clock_boundsArcColor" format="color|reference" />
+
         <attr name="clock_segmentsDivisionLineLength" format="dimension|reference" />
         <attr name="clock_segmentsDivisionLineWidth" format="dimension|reference" />
         <attr name="clock_segmentsDivisionLineColor" format="color|reference" />
@@ -29,5 +26,9 @@
             Such views will be layout in same way as views with "layer" role.-->
             <enum name="contextDrawer" value="2" />
         </attr>
+
+        <!--Specify the style res id that contains style that defines variety of
+        each context drawers attributes-->
+        <attr name="layout_handlerContextParams" format="reference" />
     </declare-styleable>
 </resources>

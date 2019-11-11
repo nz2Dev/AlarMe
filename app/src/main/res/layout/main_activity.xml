@@ -17,10 +17,6 @@
         android:layout_marginBottom="32dp"
         android:minWidth="100dp"
         android:minHeight="100dp"
-        app:clock_arcWidth="10dp"
-        app:clock_boundsArcColor="#4A01217E"
-        app:clock_rangeArcEndColor="#FF8E05"
-        app:clock_rangeArcStartColor="#291DC9"
         app:clock_segmentsDivisionLineColor="#CD116BC9"
         app:clock_segmentsDivisionLineLength="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -28,6 +24,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints">
+
+        <com.mycompany.alarme.views.drawers.HandlersRangeContextDrawer
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:clock_arcWidth="10dp"
+            app:clock_boundsArcColor="#4A01217E"
+            app:clock_rangeArcEndColor="#FF8E05"
+            app:clock_rangeArcStartColor="#291DC9"
+            app:layout_role="contextDrawer"/>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="match_parent"
