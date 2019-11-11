@@ -30,6 +30,12 @@
         tools:ignore="MissingConstraints">
 
         <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_android_black_24dp"
+            app:layout_role="layer" />
+
+        <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_degree="0"

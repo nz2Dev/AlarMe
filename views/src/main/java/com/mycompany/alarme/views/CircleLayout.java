@@ -125,22 +125,23 @@ public class CircleLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        measureChildrenByRadiusStrategy(widthMeasureSpec, heightMeasureSpec, ViewRole.Handler);
-        measureChildrenByBoxStrategy(widthMeasureSpec, heightMeasureSpec, ViewRole.ContextDrawer);
-        measureChildrenByBoxStrategy(widthMeasureSpec, heightMeasureSpec, ViewRole.Layer);
+        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
+            final View child = getChildAt(childIndex);
+            final ViewRole viewRole = ((LayoutParams) child.getLayoutParams()).role;
+            switch (viewRole) {
+                case Handler:
+                    measureChildByRadiusStrategy(child, widthMeasureSpec, heightMeasureSpec);
+                    break;
+                case ContextDrawer:
+                case Layer:
+                    measureChildByBoxStrategy(child, widthMeasureSpec, heightMeasureSpec);
+                    break;
+            }
+        }
 
         // can also take into account and use max(getSuggestedMinWidth(), getMaxMeasuredChildSize() * 2)
         setMeasuredDimension(resolveSize(getMaxMeasuredChildSize(ViewRole.Handler) * 2, widthMeasureSpec),
                 resolveSize(getMaxMeasuredChildSize(ViewRole.Handler) * 2, heightMeasureSpec));
-    }
-
-    private void measureChildrenByBoxStrategy(int widthMeasureSpec, int heightMeasureSpec, ViewRole viewRole) {
-        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
-            View child = getChildAt(childIndex);
-            if (((LayoutParams) child.getLayoutParams()).role.equals(viewRole)) {
-                measureChildByBoxStrategy(child, widthMeasureSpec, heightMeasureSpec);
-            }
-        }
     }
 
     private void measureChildByBoxStrategy(View child, int widthMeasureSpec, int heightMeasureSpec) {
@@ -153,16 +154,6 @@ public class CircleLayout extends ViewGroup {
         int childHeightMeasureSpec = getChildMeasureSpec(constrainedHeightMeasureSpec, 0, child.getLayoutParams().height);
 
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private void measureChildrenByRadiusStrategy(int widthMeasureSpec, int heightMeasureSpec, ViewRole viewRoleToMeasure) {
-        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
-            View child = getChildAt(childIndex);
-            if (((LayoutParams) child.getLayoutParams()).role.equals(viewRoleToMeasure)) {
-                measureChildByRadiusStrategy(child, widthMeasureSpec, heightMeasureSpec);
-            }
-        }
     }
 
     private void measureChildByRadiusStrategy(View child, int widthMeasureSpec, int heightMeasureSpec) {
@@ -215,17 +206,17 @@ public class CircleLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        layoutChildrenByRadiusStrategy(ViewRole.Handler);
-        layoutChildrenByBoxStrategy(ViewRole.ContextDrawer);
-        layoutChildrenByBoxStrategy(ViewRole.Layer);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private void layoutChildrenByRadiusStrategy(ViewRole viewRole) {
         for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
             final View child = getChildAt(childIndex);
-            if (((LayoutParams) child.getLayoutParams()).role.equals(viewRole)) {
-                layoutChildByRadiusStrategy(child);
+            final ViewRole viewRole = ((LayoutParams) child.getLayoutParams()).role;
+            switch (viewRole) {
+                case Handler:
+                    layoutChildByRadiusStrategy(child);
+                    break;
+                case ContextDrawer:
+                case Layer:
+                    layoutChildByBoxStrategy(child);
+                    break;
             }
         }
     }
@@ -240,15 +231,6 @@ public class CircleLayout extends ViewGroup {
 
         child.layout(childCenterX - child.getMeasuredWidth() / 2, childCenterY - child.getMeasuredHeight() / 2,
                 childCenterX + child.getMeasuredWidth() / 2, childCenterY + child.getMeasuredHeight() / 2);
-    }
-
-    private void layoutChildrenByBoxStrategy(ViewRole viewRole) {
-        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
-            final View child = getChildAt(childIndex);
-            if (((LayoutParams) child.getLayoutParams()).role.equals(viewRole)) {
-                layoutChildByBoxStrategy(child);
-            }
-        }
     }
 
     private void layoutChildByBoxStrategy(View child) {
