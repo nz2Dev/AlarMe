@@ -38,12 +38,21 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:srcCompat="@drawable/ic_android_black_24dp"
+            android:alpha="0.5"
             app:layout_role="layer" />
 
         <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/main_robot_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_degree="0"
+            app:srcCompat="@drawable/ic_android_black_24dp" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/main_robot_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_degree="45"
             app:srcCompat="@drawable/ic_android_black_24dp" />
 
         <!--        <View-->
