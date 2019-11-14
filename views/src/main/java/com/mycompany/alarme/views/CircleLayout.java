@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
+import androidx.core.util.Consumer;
 
 public class CircleLayout extends ViewGroup {
 
@@ -32,13 +33,19 @@ public class CircleLayout extends ViewGroup {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        for (int childIndex = 0; childIndex < getChildCount(); childIndex++) {
-            final View childAt = getChildAt(childIndex);
-            if (getChildRole(childAt).equals(ViewRole.ContextDrawer)) {
-                // check inside onViewAdded ensures that view with ContextDrawer role has proper type
-                ((CircleContextDrawer) childAt).recordChildrenInfo(this);
-            }
-        }
+        // check inside onViewAdded ensures that view has proper type
+        forEachChildWithRole(ViewRole.ContextDrawer, child -> {
+            final CircleContextDrawer contextDrawer = (CircleContextDrawer) child;
+
+            forEachChildWithRole(ViewRole.Handler, childToRecord -> {
+                final LayoutParams childParams = getChildParams(childToRecord);
+                contextDrawer.onRecordLayoutParams(childToRecord.getId(), childParams);
+                contextDrawer.onRecordContextParams(childToRecord.getId(), childToRecord.getContext().getTheme(), childParams.drawerParamsStyleId);
+                contextDrawer.onRecordViewParams(childToRecord.getId(), childToRecord.getTranslationX(), childToRecord.getTranslationY(), childToRecord.getRotation());
+            });
+
+            contextDrawer.onRecordingFinished();
+        });
     }
 
     @Override
@@ -161,8 +168,21 @@ public class CircleLayout extends ViewGroup {
         return new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
+    private LayoutParams getChildParams(View child) {
+        return ((LayoutParams) child.getLayoutParams());
+    }
+
     private ViewRole getChildRole(View child) {
         return ((LayoutParams) child.getLayoutParams()).role;
+    }
+
+    private void forEachChildWithRole(ViewRole viewRole, Consumer<View> viewWithRoleConsumer) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (getChildRole(child).equals(viewRole)) {
+                viewWithRoleConsumer.accept(child);
+            }
+        }
     }
 
     public enum ViewRole {
@@ -182,7 +202,7 @@ public class CircleLayout extends ViewGroup {
          * attributes items. Only applicable for views with {@link ViewRole#Handler} role
          */
         @StyleRes
-        public int drawerParamsStyleId;
+        private final int drawerParamsStyleId;
 
         private LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
@@ -195,6 +215,16 @@ public class CircleLayout extends ViewGroup {
             angle = Math.toRadians(degree);
         }
 
+        private LayoutParams(int width, int height) {
+            super(width, height);
+            drawerParamsStyleId = 0;
+        }
+
+        private LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+            drawerParamsStyleId = 0;
+        }
+
         public int getDegree() {
             return degree;
         }
@@ -205,14 +235,6 @@ public class CircleLayout extends ViewGroup {
 
         public ViewRole getRole() {
             return role;
-        }
-
-        private LayoutParams(int width, int height) {
-            super(width, height);
-        }
-
-        private LayoutParams(ViewGroup.LayoutParams source) {
-            super(source);
         }
     }
 

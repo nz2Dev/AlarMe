@@ -40,9 +40,9 @@
             android:id="@+id/main_robot_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_role="handler"
-            app:layout_handlerDegree="140"
             app:layout_handlerContextParams="@style/DrawerParams.Robot.A"
+            app:layout_handlerDegree="0"
+            app:layout_role="handler"
             app:srcCompat="@drawable/ic_android_black_24dp" />
 
         <androidx.appcompat.widget.AppCompatImageView

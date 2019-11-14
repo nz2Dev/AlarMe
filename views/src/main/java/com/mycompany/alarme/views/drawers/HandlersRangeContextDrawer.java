@@ -1,7 +1,7 @@
 package com.mycompany.alarme.views.drawers;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,12 +9,13 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.Consumer;
 
 import com.mycompany.alarme.views.CircleContextDrawer;
 import com.mycompany.alarme.views.CircleLayout;
@@ -24,7 +25,7 @@ public class HandlersRangeContextDrawer extends View implements CircleContextDra
 
     public static final int ARC_STROKE_DEFAULT_VALUE = 20;
 
-    private SparseArray<DrawerParams> drawerParams = new SparseArray<>();
+    private SparseArray<DrawerParams> paramsArrayMap = new SparseArray<>();
 
     private int arcStrokeWidth;
     private RectF arcRect = new RectF();
@@ -51,6 +52,46 @@ public class HandlersRangeContextDrawer extends View implements CircleContextDra
         boundsArcPaint.setColor(boundsArcColor);
     }
 
+    private void applyParams(int viewId, Consumer<DrawerParams> paramsConsumer) {
+        DrawerParams drawerParams = paramsArrayMap.get(viewId);
+        if (drawerParams == null) {
+            drawerParams = new DrawerParams();
+            paramsArrayMap.append(viewId, drawerParams);
+        }
+        paramsConsumer.accept(drawerParams);
+    }
+
+    @Override
+    public void onRecordLayoutParams(int viewId, @NonNull CircleLayout.LayoutParams layoutParams) {
+        applyParams(viewId, drawerParams -> {
+            drawerParams.degree = layoutParams.getDegree();
+            // but additionally the layout params could be checked for type
+            // and additional logic that rely on that could be implemented there
+        });
+    }
+
+    @Override
+    public void onRecordContextParams(int viewId, @NonNull Resources.Theme theme, int contextParamsStyleId) {
+        applyParams(viewId, drawerParams -> {
+            final TypedArray typedArray = theme.obtainStyledAttributes(contextParamsStyleId, R.styleable.HandlersRangeContextDrawer_Params);
+            drawerParams.color = typedArray.getColor(R.styleable.HandlersRangeContextDrawer_Params_handlerRangeColor, randomColor());
+            typedArray.recycle();
+        });
+    }
+
+    @Override
+    public void onRecordingFinished() {
+        gradientColors = new int[paramsArrayMap.size()];
+        gradientPositions = new float[paramsArrayMap.size()];
+        for (int handlerDrawerParamIndex = 0; handlerDrawerParamIndex < paramsArrayMap.size(); handlerDrawerParamIndex++) {
+            DrawerParams params = paramsArrayMap.valueAt(handlerDrawerParamIndex);
+            gradientColors[handlerDrawerParamIndex] = params.color;
+            gradientPositions[handlerDrawerParamIndex] = params.degree / 360f;
+        }
+
+        updateRangeArcPaintShader();
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         int radius = Math.min(w, h) / 2;
@@ -67,44 +108,10 @@ public class HandlersRangeContextDrawer extends View implements CircleContextDra
         updateRangeArcPaintShader();
     }
 
-    @Override
-    public void recordChildrenInfo(CircleLayout layout) {
-        for (int childIndex = 0; childIndex < layout.getChildCount(); childIndex++) {
-            View childAt = layout.getChildAt(childIndex);
-            if (((CircleLayout.LayoutParams) childAt.getLayoutParams()).getRole().equals(CircleLayout.ViewRole.Handler)) {
-                if (childAt.getId() != NO_ID) {
-                    drawerParams.append(childAt.getId(), createParams(childAt));
-                } else {
-                    Log.d(getClass().getSimpleName(), "recordChildrenInfo: view with handler role don't have id, skipping");
-                }
-            }
-        }
-
-        gradientColors = new int[drawerParams.size()];
-        gradientPositions = new float[drawerParams.size()];
-        for (int handlerDrawerParamIndex = 0; handlerDrawerParamIndex < drawerParams.size(); handlerDrawerParamIndex++) {
-            DrawerParams params = drawerParams.valueAt(handlerDrawerParamIndex);
-            gradientColors[handlerDrawerParamIndex] = params.color;
-            gradientPositions[handlerDrawerParamIndex] = params.degree / 360f;
-        }
-
-        updateRangeArcPaintShader();
-    }
-
     private void updateRangeArcPaintShader() {
         if (gradientColors.length >= 2) {
             rangeArcPaint.setShader(new SweepGradient(getWidth() / 2, getHeight() / 2, gradientColors, gradientPositions));
         }
-    }
-
-    private DrawerParams createParams(View view) {
-        final CircleLayout.LayoutParams layoutParams = (CircleLayout.LayoutParams) view.getLayoutParams();
-        final DrawerParams drawerParams = new DrawerParams();
-        @SuppressLint("CustomViewStyleable") final TypedArray typedArray = view.getContext().obtainStyledAttributes(layoutParams.drawerParamsStyleId, R.styleable.HandlersRangeContextDrawer_Params);
-        drawerParams.color = typedArray.getColor(R.styleable.HandlersRangeContextDrawer_Params_handlerRangeColor, randomColor());
-        typedArray.recycle();
-        drawerParams.degree = layoutParams.getDegree();
-        return drawerParams;
     }
 
     private static int randomColor() {
@@ -117,12 +124,12 @@ public class HandlersRangeContextDrawer extends View implements CircleContextDra
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (drawerParams.size() <= 1) {
+        if (paramsArrayMap.size() <= 1) {
             // not enough handlers to draw range
             return;
         }
 
-        final DrawerParams lastParams = drawerParams.valueAt(drawerParams.size() - 1);
+        final DrawerParams lastParams = paramsArrayMap.valueAt(paramsArrayMap.size() - 1);
         canvas.drawArc(arcRect, 0, (float) lastParams.degree, false, rangeArcPaint);
         canvas.drawArc(arcRect, (float) lastParams.degree, (float) (360 - lastParams.degree), false, boundsArcPaint);
     }
