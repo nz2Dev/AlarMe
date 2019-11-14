@@ -2,8 +2,12 @@ package com.mycompany.alarme.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
@@ -12,12 +16,15 @@ import androidx.core.util.Consumer;
 
 public class CircleLayout extends ViewGroup {
 
+    private final ViewConfiguration viewConfiguration;
+
     private int radius;
     private int startX;
     private int startY;
 
     public CircleLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        viewConfiguration = ViewConfiguration.get(context);
     }
 
     @Override
@@ -146,6 +153,129 @@ public class CircleLayout extends ViewGroup {
     private void layoutChildByBoxStrategy(View child) {
         child.layout(startX - child.getMeasuredWidth() / 2, startY - child.getMeasuredHeight() / 2,
                 startX + child.getMeasuredWidth() / 2, startY + child.getMeasuredHeight() / 2);
+    }
+
+    private float downX, downY;
+    private Rect hitRectBuffer = new Rect();
+    private View touchedView;
+
+//    @Override
+//    todo add support for intercepting
+//    public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+//            // if the view is clickable and receive going to receive an onTouchEvent,
+//            // before it does that, only then this method will be called, right?
+//            // if so, we than should check if we start moving, and still the event from the view
+//            // because user probably wont click on that event
+//            downX = ev.getX();
+//            downY = ev.getY();
+//
+//            forEachChildWithRole(ViewRole.Handler, view -> {
+//                view.getHitRect(hitRectBuffer);
+//                if (hitRectBuffer.contains((int) downX, (int) downY)) {
+//                    if (touchedView != null) {
+//                        Log.d(getClass().getSimpleName(), String.format("onInterceptTouchEvent: touched view overwritten, was %s, now %s", touchedView, view));
+//                    }
+//
+//                    touchedView = view;
+//                }
+//            });
+//
+//            return false;
+//        }
+//
+//        // and if we didn't clicked on proper view with ViewRole.Handler, we wouldn't even try to still events
+//        // and otherwise, we will try so
+//        if (touchedView != null && ev.getAction() == MotionEvent.ACTION_MOVE) {
+//            float dx = ev.getX() - downX;
+//            float dy = ev.getY() - downY;
+//
+//            if (dx > viewConfiguration.getScaledTouchSlop() || dy > viewConfiguration.getScaledTouchSlop()) {
+//                // we started the transformation, so let's intercept all the rest events
+//                return true;
+//            } else {
+//                // we still not in scrolling state, maybe user only want to click on item
+//                return false;
+//            }
+//        } else {
+//            // no child that need transformation were touched, or we not in move action
+//            return false;
+//        }
+//    }
+
+    float touchedViewCenterX;
+    float touchedViewCenterY;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // but we also can receive this event regularly first
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            downX = event.getX();
+            downY = event.getY();
+
+            forEachChildWithRole(ViewRole.Handler, view -> {
+                view.getHitRect(hitRectBuffer);
+                if (hitRectBuffer.contains((int) downX, (int) downY)) {
+                    if (touchedView != null) {
+                        Log.d(getClass().getSimpleName(), String.format("onInterceptTouchEvent: touched view overwritten, was %s, now %s", touchedView, view));
+                    }
+
+                    touchedView = view;
+                }
+            });
+
+            if (touchedView != null) {
+                touchedViewCenterX = touchedView.getX();
+                touchedViewCenterY = touchedView.getY();
+            }
+
+            // if we touched something, then we want to receive a move event
+            return touchedView != null;
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            // so we can assume that the view is a ViewRole.Handler
+            // because it's checked in on intercept method
+            if (touchedView == null) {
+                // we started to intercept touch event, so we should have touched view according to onInterceptTouchEvent
+                throw new RuntimeException("Should exist");
+            }
+
+            final float touchX = event.getX();
+            final float touchY = event.getY();
+
+            // now we should calculate what degree current touch point is facing
+            // todo then get the initial degree, and interpolate from there to current by some delta time
+            float touchVectorX = touchX - startX;
+            float touchVectorY = touchY - startY;
+            double touchVectorAngle = Math.atan2(touchVectorY, touchVectorX);
+
+            // then find distance to the center of touched view from layout center
+            // seams that this can be calculated once when view is touched
+            float centerToViewVectorX = touchedViewCenterX - startX;
+            float centerToViewVectorY = touchedViewCenterY - startY;
+            final double centerToViewDistance = Math.sqrt(centerToViewVectorX * centerToViewVectorX + centerToViewVectorY * centerToViewVectorY);
+
+            // multiply that distance by final degree angle and add layout center coordinate
+            final double shiftedViewX = Math.cos(touchVectorAngle) * centerToViewDistance + startX;
+            final double shiftedViewY = Math.sin(touchVectorAngle) * centerToViewDistance + startY;
+
+            // final x and y subtract from touched view original x and y, and write those values
+            // as view translation x and y.
+            touchedView.setTranslationX((float) (shiftedViewX - touchedViewCenterX));
+            touchedView.setTranslationY((float) (shiftedViewY - touchedViewCenterY));
+            return true;
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            touchedView.setTranslationY(0);
+            touchedView.setTranslationX(0);
+            touchedView = null;
+            return true;
+        }
+
+        return true;
     }
 
     @Override
