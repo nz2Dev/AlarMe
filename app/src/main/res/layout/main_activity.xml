@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
     <com.mycompany.alarme.views.CircleLayout
         android:id="@+id/clockPickerView"
         android:layout_width="0dp"
@@ -17,8 +16,6 @@
         android:layout_marginBottom="32dp"
         android:minWidth="100dp"
         android:minHeight="100dp"
-        app:clock_segmentsDivisionLineColor="#CD116BC9"
-        app:clock_segmentsDivisionLineLength="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,19 +27,20 @@
             android:layout_height="match_parent"
             app:clock_arcWidth="10dp"
             app:clock_boundsArcColor="#4A01217E"
-            app:layout_role="contextDrawer"/>
+            app:layout_role="contextDrawer" />
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <com.mycompany.alarme.views.layers.ClockSegmentsLayerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:srcCompat="@drawable/ic_android_black_24dp"
-            android:alpha="0.5"
+            app:clock_segmentsDivisionLineColor="#CD116BC9"
+            app:clock_segmentsDivisionLineLength="10dp"
             app:layout_role="layer" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/main_robot_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_role="handler"
             app:layout_handlerDegree="140"
             app:layout_handlerContextParams="@style/DrawerParams.Robot.A"
             app:srcCompat="@drawable/ic_android_black_24dp" />
@@ -51,6 +49,7 @@
             android:id="@+id/main_robot_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_role="handler"
             app:layout_handlerDegree="220"
             app:layout_handlerContextParams="@style/DrawerParams.Robot.B"
             app:srcCompat="@drawable/ic_android_black_24dp" />

@@ -2,33 +2,14 @@ package com.mycompany.alarme.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 
 public class CircleLayout extends ViewGroup {
-
-    public static final int SEGMENT_DIVISION_DEFAULT_LINE_SIZE = 20;
-    public static final int SEGMENT_DIVISION_DEFAULT_OFFSET = 50;
-    public static final int SEGMENT_DIVISION_DEFAULT_LINE_WIDTH = 5;
-
-    private Paint debugPaint;
-
-    private Paint segmentDivisionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private double segmentDivisionLineLength;
-    private @ColorInt int segmentDivisionLineColor;
-    private int segmentsCount = 12;
-    private int segmentDegree = 360 / segmentsCount;
-    private int segmentDivisionOffset;
-    private int segmentDivisionEndRadius;
-    private int segmentDivisionLineWidth;
 
     private int radius;
     private int startX;
@@ -36,23 +17,6 @@ public class CircleLayout extends ViewGroup {
 
     public CircleLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        final TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CircleLayout);
-        segmentDivisionLineLength = typedArray.getDimensionPixelSize(R.styleable.CircleLayout_clock_segmentsDivisionLineLength, SEGMENT_DIVISION_DEFAULT_LINE_SIZE);
-        segmentDivisionOffset = typedArray.getDimensionPixelSize(R.styleable.CircleLayout_clock_segmentsDivisionOffset, SEGMENT_DIVISION_DEFAULT_OFFSET);
-        segmentDivisionLineColor = typedArray.getColor(R.styleable.CircleLayout_clock_segmentsDivisionLineColor, Color.GRAY);
-        segmentDivisionLineWidth = typedArray.getDimensionPixelSize(R.styleable.CircleLayout_clock_segmentsDivisionLineWidth, SEGMENT_DIVISION_DEFAULT_LINE_WIDTH);
-        typedArray.recycle();
-
-        segmentDivisionPaint.setStyle(Paint.Style.STROKE);
-        segmentDivisionPaint.setColor(segmentDivisionLineColor);
-        segmentDivisionPaint.setStrokeWidth(segmentDivisionLineWidth);
-
-        debugPaint = new Paint();
-        debugPaint.setStyle(Paint.Style.STROKE);
-        debugPaint.setColor(Color.BLACK);
-
-        setWillNotDraw(false);
-
     }
 
     @Override
@@ -142,8 +106,6 @@ public class CircleLayout extends ViewGroup {
         startX = w / 2;
         startY = h / 2;
         radius = Math.min(w, h) / 2;
-
-        segmentDivisionEndRadius = radius - segmentDivisionOffset;
     }
 
     @Override
@@ -177,24 +139,6 @@ public class CircleLayout extends ViewGroup {
     private void layoutChildByBoxStrategy(View child) {
         child.layout(startX - child.getMeasuredWidth() / 2, startY - child.getMeasuredHeight() / 2,
                 startX + child.getMeasuredWidth() / 2, startY + child.getMeasuredHeight() / 2);
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        canvas.save();
-        for (int segment = 0; segment < segmentsCount; segment++) {
-            double angle = Math.toRadians(segment * segmentDegree);
-            double angleSin = Math.sin(angle);
-            double angleCos = Math.cos(angle);
-
-            canvas.drawLine(
-                    ((float) (startX + angleCos * (segmentDivisionEndRadius - segmentDivisionLineLength))),
-                    ((float) (startY + angleSin * (segmentDivisionEndRadius - segmentDivisionLineLength))),
-                    ((float) (startX + angleCos * segmentDivisionEndRadius)),
-                    ((float) (startY + angleSin * segmentDivisionEndRadius)),
-                    segmentDivisionPaint);
-        }
-        canvas.restore();
     }
 
     @Override

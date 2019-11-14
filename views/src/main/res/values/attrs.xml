@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="CircleLayout">
-        <attr name="clock_segmentsDivisionLineLength" format="dimension|reference" />
-        <attr name="clock_segmentsDivisionLineWidth" format="dimension|reference" />
-        <attr name="clock_segmentsDivisionLineColor" format="color|reference" />
-        <attr name="clock_segmentsDivisionOffset" format="dimension|reference" />
-    </declare-styleable>
-
     <declare-styleable name="CircleLayout_Layout">
         <attr name="layout_role" format="enum">
             <!--A role for the view inside circle layout.
@@ -29,5 +22,12 @@
         <attr name="layout_handlerContextParams" format="reference" />
         <!--The degree at which the view with handler role will be layout-->
         <attr name="layout_handlerDegree" format="integer|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ClockSegmentsLayerView">
+        <attr name="clock_segmentsDivisionLineLength" format="dimension|reference" />
+        <attr name="clock_segmentsDivisionLineWidth" format="dimension|reference" />
+        <attr name="clock_segmentsDivisionLineColor" format="color|reference" />
+        <attr name="clock_segmentsDivisionOffset" format="dimension|reference" />
     </declare-styleable>
 </resources>
