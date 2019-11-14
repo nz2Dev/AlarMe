@@ -155,10 +155,6 @@ public class CircleLayout extends ViewGroup {
                 startX + child.getMeasuredWidth() / 2, startY + child.getMeasuredHeight() / 2);
     }
 
-    private float downX, downY;
-    private Rect hitRectBuffer = new Rect();
-    private View touchedView;
-
 //    @Override
 //    todo add support for intercepting
 //    public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -203,6 +199,10 @@ public class CircleLayout extends ViewGroup {
 //        }
 //    }
 
+    private float downX, downY;
+    private Rect hitRectBuffer = new Rect();
+    private View touchedView;
+    private double startToTouchViewCenterDistance;
     float touchedViewCenterX;
     float touchedViewCenterY;
 
@@ -226,8 +226,13 @@ public class CircleLayout extends ViewGroup {
             });
 
             if (touchedView != null) {
-                touchedViewCenterX = touchedView.getX();
-                touchedViewCenterY = touchedView.getY();
+                touchedViewCenterX = touchedView.getX() + touchedView.getWidth() / 2f;
+                touchedViewCenterY = touchedView.getY() + touchedView.getHeight() / 2f;
+
+                // then find distance to the center of touched view from layout center
+                float startToViewCenterVectorX = touchedViewCenterX - startX;
+                float startToViewCenterVectorY = touchedViewCenterY - startY;
+                startToTouchViewCenterDistance = Math.sqrt(startToViewCenterVectorX * startToViewCenterVectorX + startToViewCenterVectorY * startToViewCenterVectorY);
             }
 
             // if we touched something, then we want to receive a move event
@@ -251,20 +256,13 @@ public class CircleLayout extends ViewGroup {
             float touchVectorY = touchY - startY;
             double touchVectorAngle = Math.atan2(touchVectorY, touchVectorX);
 
-            // then find distance to the center of touched view from layout center
-            // seams that this can be calculated once when view is touched
-            float centerToViewVectorX = touchedViewCenterX - startX;
-            float centerToViewVectorY = touchedViewCenterY - startY;
-            final double centerToViewDistance = Math.sqrt(centerToViewVectorX * centerToViewVectorX + centerToViewVectorY * centerToViewVectorY);
-
             // multiply that distance by final degree angle and add layout center coordinate
-            final double shiftedViewX = Math.cos(touchVectorAngle) * centerToViewDistance + startX;
-            final double shiftedViewY = Math.sin(touchVectorAngle) * centerToViewDistance + startY;
+            final double shiftedViewCenterX = Math.cos(touchVectorAngle) * startToTouchViewCenterDistance + startX;
+            final double shiftedViewCenterY = Math.sin(touchVectorAngle) * startToTouchViewCenterDistance + startY;
 
-            // final x and y subtract from touched view original x and y, and write those values
-            // as view translation x and y.
-            touchedView.setTranslationX((float) (shiftedViewX - touchedViewCenterX));
-            touchedView.setTranslationY((float) (shiftedViewY - touchedViewCenterY));
+            // shifted x and y subtract from touched view original x and y, those will be view new translation
+            touchedView.setTranslationX((float) (shiftedViewCenterX - touchedViewCenterX));
+            touchedView.setTranslationY((float) (shiftedViewCenterY - touchedViewCenterY));
             return true;
         }
 
