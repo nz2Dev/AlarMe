@@ -208,8 +208,6 @@ public class CircleLayout extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // but we also can receive this event regularly first
-
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             downX = event.getX();
             downY = event.getY();
@@ -226,8 +224,8 @@ public class CircleLayout extends ViewGroup {
             });
 
             if (touchedView != null) {
-                touchedViewCenterX = touchedView.getX() + touchedView.getWidth() / 2f;
-                touchedViewCenterY = touchedView.getY() + touchedView.getHeight() / 2f;
+                touchedViewCenterX = touchedView.getLeft() + touchedView.getWidth() / 2f;
+                touchedViewCenterY = touchedView.getTop() + touchedView.getHeight() / 2f;
 
                 // then find distance to the center of touched view from layout center
                 float startToViewCenterVectorX = touchedViewCenterX - startX;
@@ -267,8 +265,8 @@ public class CircleLayout extends ViewGroup {
         }
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
-            touchedView.setTranslationY(0);
-            touchedView.setTranslationX(0);
+//            touchedView.setTranslationY(0);
+//            touchedView.setTranslationX(0);
             touchedView = null;
             return true;
         }
