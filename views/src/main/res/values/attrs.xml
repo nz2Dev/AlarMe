@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CircleLayout">
-
         <attr name="clock_segmentsDivisionLineLength" format="dimension|reference" />
         <attr name="clock_segmentsDivisionLineWidth" format="dimension|reference" />
         <attr name="clock_segmentsDivisionLineColor" format="color|reference" />
@@ -9,7 +8,6 @@
     </declare-styleable>
 
     <declare-styleable name="CircleLayout_Layout">
-        <attr name="layout_degree" format="integer|reference" />
         <attr name="layout_role" format="enum">
             <!--A role for the view inside circle layout.
             This means that the view will be layout as an Render layer.
@@ -26,9 +24,10 @@
             Such views will be layout in same way as views with "layer" role.-->
             <enum name="contextDrawer" value="2" />
         </attr>
-
         <!--Specify the style res id that contains style that defines variety of
         each context drawers attributes-->
         <attr name="layout_handlerContextParams" format="reference" />
+        <!--The degree at which the view with handler role will be layout-->
+        <attr name="layout_handlerDegree" format="integer|reference" />
     </declare-styleable>
 </resources>

@@ -30,8 +30,6 @@
             android:layout_height="match_parent"
             app:clock_arcWidth="10dp"
             app:clock_boundsArcColor="#4A01217E"
-            app:clock_rangeArcEndColor="#FF8E05"
-            app:clock_rangeArcStartColor="#291DC9"
             app:layout_role="contextDrawer"/>
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -45,7 +43,7 @@
             android:id="@+id/main_robot_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_degree="0"
+            app:layout_handlerDegree="140"
             app:layout_handlerContextParams="@style/DrawerParams.Robot.A"
             app:srcCompat="@drawable/ic_android_black_24dp" />
 
@@ -53,22 +51,9 @@
             android:id="@+id/main_robot_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_degree="45"
+            app:layout_handlerDegree="220"
             app:layout_handlerContextParams="@style/DrawerParams.Robot.B"
             app:srcCompat="@drawable/ic_android_black_24dp" />
-
-        <!--        <View-->
-        <!--            android:id="@+id/context_drawer_a"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            app:layout_role="ContextDrawer"/>-->
-
-        <!--        <View-->
-        <!--            android:id="@+id/child_one"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            app:layout_role="Handler"-->
-        <!--            app:layout_contextParams="@style/ContextParams.ParamsA"/>-->
 
     </com.mycompany.alarme.views.CircleLayout>
 

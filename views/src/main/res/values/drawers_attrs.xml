@@ -7,8 +7,6 @@
     the view itself, such as color of the bounds-->
     <declare-styleable name="HandlersRangeContextDrawer">
         <attr name="clock_arcWidth" format="dimension|reference" />
-        <attr name="clock_rangeArcStartColor" format="color|reference" />
-        <attr name="clock_rangeArcEndColor" format="color|reference" />
         <attr name="clock_boundsArcColor" format="color|reference" />
     </declare-styleable>
 

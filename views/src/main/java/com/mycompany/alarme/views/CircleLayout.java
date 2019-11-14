@@ -5,18 +5,13 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.FloatRange;
-import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
-import androidx.core.math.MathUtils;
 
 public class CircleLayout extends ViewGroup {
 
@@ -114,9 +109,10 @@ public class CircleLayout extends ViewGroup {
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
+    // we constraint child to be not bigger that radius on horizontal and vertical dimensions
     private void measureChildByRadiusStrategy(View child, int widthMeasureSpec, int heightMeasureSpec) {
         int radiusSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec)) / 2;
-        // child offset should decrees this radius size value
+        // child radius margin should decrees this radius size value
 
         int constrainedWidthMeasureSpec = MeasureSpec.makeMeasureSpec(radiusSize, MeasureSpec.getMode(widthMeasureSpec));
         int childWidthMeasureSpec = getChildMeasureSpec(constrainedWidthMeasureSpec, /*todo support padding*/0, child.getLayoutParams().width);
@@ -170,9 +166,9 @@ public class CircleLayout extends ViewGroup {
         final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
         // final int childOuterRadius = (int) Math.sqrt(child.getMeasuredWidth() * child.getMeasuredWidth() + child.getMeasuredHeight() * child.getMeasuredHeight()) / 2;
         final int childInnerRadius = Math.min(child.getMeasuredWidth(), child.getMeasuredHeight()) / 2;
-        final float childToCenterVectorLength = radius - /*childOuterRadius*/ childInnerRadius;
-        final int childCenterX = (int) (startX + Math.cos(childParams.angle) * childToCenterVectorLength);
-        final int childCenterY = (int) (startY + Math.sin(childParams.angle) * childToCenterVectorLength);
+        final float startToChildCenterVectorLength = radius - /*childOuterRadius*/ childInnerRadius;
+        final int childCenterX = (int) (startX + Math.cos(childParams.angle) * startToChildCenterVectorLength);
+        final int childCenterY = (int) (startY + Math.sin(childParams.angle) * startToChildCenterVectorLength);
 
         child.layout(childCenterX - child.getMeasuredWidth() / 2, childCenterY - child.getMeasuredHeight() / 2,
                 childCenterX + child.getMeasuredWidth() / 2, childCenterY + child.getMeasuredHeight() / 2);
@@ -185,9 +181,6 @@ public class CircleLayout extends ViewGroup {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // debug draw measured bounds
-        // canvas.drawRect(startX - radius, startY - radius, startX + radius - 1, startY + radius - 1, debugPaint);
-
         canvas.save();
         for (int segment = 0; segment < segmentsCount; segment++) {
             double angle = Math.toRadians(segment * segmentDegree);
@@ -250,7 +243,7 @@ public class CircleLayout extends ViewGroup {
         private LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
             final TypedArray typedArray = c.obtainStyledAttributes(attrs, R.styleable.CircleLayout_Layout);
-            degree = typedArray.getInteger(R.styleable.CircleLayout_Layout_layout_degree, 0);
+            degree = typedArray.getInteger(R.styleable.CircleLayout_Layout_layout_handlerDegree, 0);
             role = ViewRole.values()[typedArray.getInt(R.styleable.CircleLayout_Layout_layout_role, ViewRole.Handler.ordinal())];
             drawerParamsStyleId = typedArray.getResourceId(R.styleable.CircleLayout_Layout_layout_handlerContextParams, 0);
             typedArray.recycle();

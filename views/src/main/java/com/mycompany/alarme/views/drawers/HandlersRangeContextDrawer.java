@@ -58,11 +58,11 @@ public class HandlersRangeContextDrawer extends View implements CircleContextDra
         centerY = getHeight() / 2;
 
         // set the circle rect for gradient arc, shrink it by a half of stroke width in order to fit inside view bounds
-        final float halfOfArchStrokeWidget = arcStrokeWidth / 2f;
-        arcRect.set(centerX - (radius - halfOfArchStrokeWidget),
-                centerY - (radius - halfOfArchStrokeWidget),
-                centerX + (radius - halfOfArchStrokeWidget),
-                centerY + (radius - halfOfArchStrokeWidget));
+        final float halfOfArchStrokeWidth = arcStrokeWidth / 2f;
+        arcRect.set(centerX - (radius - halfOfArchStrokeWidth),
+                centerY - (radius - halfOfArchStrokeWidth),
+                centerX + (radius - halfOfArchStrokeWidth),
+                centerY + (radius - halfOfArchStrokeWidth));
 
         updateRangeArcPaintShader();
     }
