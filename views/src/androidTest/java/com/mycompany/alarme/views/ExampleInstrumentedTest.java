@@ -1,9 +1,9 @@
-package com.mycompany.alarme.app;
+package com.mycompany.alarme.views;
 
 import android.content.Context;
 
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("com.mycompany.alarme.app", appContext.getPackageName());
+        assertEquals("com.mycompany.alarme.views.test", appContext.getPackageName());
     }
 }

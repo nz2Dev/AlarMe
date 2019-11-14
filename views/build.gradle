@@ -1,16 +1,14 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion compileSdk_version
 
     defaultConfig {
-        applicationId "com.mycompany.alarme"
         minSdkVersion minSdk_version
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         targetSdkVersion targetSdk_version
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        versionCode appVersion_code
-        versionName appVersion_name
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -27,7 +25,6 @@ android {
 }
 
 dependencies {
-    implementation project(path: ":views")
     implementation rootProject.ext.appCompat
     implementation rootProject.ext.constraintLayout
 

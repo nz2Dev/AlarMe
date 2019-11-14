@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircleLayout_Layout">
+        <attr name="layout_role" format="enum">
+            <!--A role for the view inside circle layout.
+            This means that the view will be layout as an Render layer.
+            Much the same as inside FrameLayout-->
+            <enum name="layer" value="0" />
+
+            <!--A role that defines a view that will be stick to the orbit
+            so that all circle attributes will be applied to it-->
+            <enum name="handler" value="1" />
+
+            <!--A special role of views that can receives all the information
+            about all the handlers inside the layout so that it can draw some context graphics for them
+            based on their information and more. See CircleLayout for more details.
+            Such views will be layout in same way as views with "layer" role.-->
+            <enum name="contextDrawer" value="2" />
+        </attr>
+        <!--Specify the style res id that contains style that defines variety of
+        each context drawers attributes-->
+        <attr name="layout_handlerContextParams" format="reference" />
+        <!--The degree at which the view with handler role will be layout-->
+        <attr name="layout_handlerDegree" format="integer|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ClockSegmentsLayerView">
+        <attr name="clock_segmentsDivisionLineLength" format="dimension|reference" />
+        <attr name="clock_segmentsDivisionLineWidth" format="dimension|reference" />
+        <attr name="clock_segmentsDivisionLineColor" format="color|reference" />
+        <attr name="clock_segmentsDivisionOffset" format="dimension|reference" />
+    </declare-styleable>
+</resources>

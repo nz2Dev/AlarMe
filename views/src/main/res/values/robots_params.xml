@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DrawerParams.Robot.A" parent="">
+        <item name="handlerRangeColor">#291DC9</item>
+    </style>
+    <style name="DrawerParams.Robot.B" parent="">
+        <item name="handlerRangeColor">#FF8E05</item>
+    </style>
+</resources>

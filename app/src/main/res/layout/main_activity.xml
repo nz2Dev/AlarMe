@@ -4,15 +4,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".app.MainActivity">
+    tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
+    <com.mycompany.alarme.views.CircleLayout
+        android:id="@+id/clockPickerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:minWidth="100dp"
+        android:minHeight="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints">
+
+        <com.mycompany.alarme.views.drawers.HandlersRangeContextDrawer
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:clock_arcWidth="10dp"
+            app:clock_boundsArcColor="#4A01217E"
+            app:layout_role="contextDrawer" />
+
+        <com.mycompany.alarme.views.layers.ClockSegmentsLayerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:clock_segmentsDivisionLineColor="#CD116BC9"
+            app:clock_segmentsDivisionLineLength="10dp"
+            app:layout_role="layer" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/main_robot_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_handlerContextParams="@style/DrawerParams.Robot.A"
+            app:layout_handlerDegree="0"
+            app:layout_role="handler"
+            app:srcCompat="@drawable/ic_android_black_24dp" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/main_robot_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_role="handler"
+            app:layout_handlerDegree="220"
+            app:layout_handlerContextParams="@style/DrawerParams.Robot.B"
+            app:srcCompat="@drawable/ic_android_black_24dp" />
+
+    </com.mycompany.alarme.views.CircleLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

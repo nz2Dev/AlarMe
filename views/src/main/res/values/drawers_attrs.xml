@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--it could be defined in separate module-->
+    <eat-comment />
+
+    <!--So because it's a view, we can specify it attributes for
+    the view itself, such as color of the bounds-->
+    <declare-styleable name="HandlersRangeContextDrawer">
+        <attr name="clock_arcWidth" format="dimension|reference" />
+        <attr name="clock_boundsArcColor" format="color|reference" />
+    </declare-styleable>
+
+    <!--And this is a custom declared styleable, the suffix _Params
+    doesn't mean anything specific to AndroidStudio or something,
+    but it rather a convention-->
+    <declare-styleable name="HandlersRangeContextDrawer_Params">
+        <attr name="handlerRangeColor" format="color|reference" />
+    </declare-styleable>
+</resources>
