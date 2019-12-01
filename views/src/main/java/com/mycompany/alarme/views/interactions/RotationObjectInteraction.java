@@ -5,6 +5,7 @@ import android.view.MotionEvent;
 
 import com.mycompany.alarme.views.CircleObjectInteraction;
 import com.mycompany.alarme.views.HostViewContext;
+import com.mycompany.alarme.views.ViewParams;
 
 public class RotationObjectInteraction implements CircleObjectInteraction {
 
@@ -15,11 +16,12 @@ public class RotationObjectInteraction implements CircleObjectInteraction {
     @Override
     public boolean hasContact(int viewId, HostViewContext host, ViewParamsProvider paramsProvider, MotionEvent motionEvent) {
         final Rect hitRect = paramsProvider.getHitRect();
+        final ViewParams viewParams = paramsProvider.getViewParams();
         final boolean contact = hitRect.contains((int) motionEvent.getX(), (int) motionEvent.getY());
 
         if (contact) {
-            touchedViewCenterX = hitRect.left + hitRect.width() / 2f;
-            touchedViewCenterY = hitRect.top + hitRect.height() / 2f;
+            touchedViewCenterX = viewParams.getLeft() + viewParams.getWidth() / 2f;
+            touchedViewCenterY = viewParams.getTop() + viewParams.getHeight() / 2f;
 
             // then find distance to the center of touched view from layout center
             float startToViewCenterVectorX = touchedViewCenterX - host.getCenterX();

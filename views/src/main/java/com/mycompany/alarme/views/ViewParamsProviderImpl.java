@@ -16,7 +16,8 @@ class ViewParamsProviderImpl implements CircleObjectInteraction.ViewParamsProvid
 
     @Override
     public ViewParams getViewParams() {
-        return new ViewParams(targetView.getTranslationX(), targetView.getTranslationY(), targetView.getRotation());
+        return new ViewParams(targetView.getLeft(), targetView.getTop(), targetView.getWidth(), targetView.getHeight(),
+                targetView.getTranslationX(), targetView.getTranslationY(), targetView.getRotation());
     }
 
     @Override

@@ -14,7 +14,8 @@ class ViewUpdatesControllerImpl implements CircleObjectInteraction.ViewUpdatesCo
 
     @Override
     public void updateViewParams(Consumer<ViewParams> viewParamsUpdater) {
-        ViewParams params = new ViewParams(targetView.getTranslationX(), targetView.getTranslationY(), targetView.getRotation());
+        ViewParams params = new ViewParams(targetView.getLeft(), targetView.getTop(), targetView.getWidth(), targetView.getHeight(),
+                targetView.getTranslationX(), targetView.getTranslationY(), targetView.getRotation());
         viewParamsUpdater.accept(params);
         targetView.setTranslationX(params.getTranslationX());
         targetView.setTranslationY(params.getTranslationY());
