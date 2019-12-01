@@ -2,7 +2,6 @@ package com.mycompany.alarme.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -14,9 +13,17 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.core.util.Consumer;
 
+import com.mycompany.alarme.views.interactions.RotationObjectInteraction;
+
 public class CircleLayout extends ViewGroup {
 
     private final ViewConfiguration viewConfiguration;
+
+    // todo implement injection
+    private CircleObjectInteraction interaction = new RotationObjectInteraction();
+    private ViewUpdatesControllerImpl viewUpdatesControllerImpl;
+    private HostViewContext hostViewContext;
+    private View contactView;
 
     private int radius;
     private int startX;
@@ -169,11 +176,11 @@ public class CircleLayout extends ViewGroup {
 //            forEachChildWithRole(ViewRole.Handler, view -> {
 //                view.getHitRect(hitRectBuffer);
 //                if (hitRectBuffer.contains((int) downX, (int) downY)) {
-//                    if (touchedView != null) {
-//                        Log.d(getClass().getSimpleName(), String.format("onInterceptTouchEvent: touched view overwritten, was %s, now %s", touchedView, view));
+//                    if (contactView != null) {
+//                        Log.d(getClass().getSimpleName(), String.format("onInterceptTouchEvent: touched view overwritten, was %s, now %s", contactView, view));
 //                    }
 //
-//                    touchedView = view;
+//                    contactView = view;
 //                }
 //            });
 //
@@ -182,7 +189,7 @@ public class CircleLayout extends ViewGroup {
 //
 //        // and if we didn't clicked on proper view with ViewRole.Handler, we wouldn't even try to still events
 //        // and otherwise, we will try so
-//        if (touchedView != null && ev.getAction() == MotionEvent.ACTION_MOVE) {
+//        if (contactView != null && ev.getAction() == MotionEvent.ACTION_MOVE) {
 //            float dx = ev.getX() - downX;
 //            float dy = ev.getY() - downY;
 //
@@ -199,75 +206,48 @@ public class CircleLayout extends ViewGroup {
 //        }
 //    }
 
-    private float downX, downY;
-    private Rect hitRectBuffer = new Rect();
-    private View touchedView;
-    private double startToTouchViewCenterDistance;
-    float touchedViewCenterX;
-    float touchedViewCenterY;
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            downX = event.getX();
-            downY = event.getY();
+            ViewParamsProviderImpl paramsProvider = new ViewParamsProviderImpl();
+            hostViewContext = new HostViewContext();
+            hostViewContext.set(getLeft(), getTop(), getWidth(), getHeight());
 
             forEachChildWithRole(ViewRole.Handler, view -> {
-                view.getHitRect(hitRectBuffer);
-                if (hitRectBuffer.contains((int) downX, (int) downY)) {
-                    if (touchedView != null) {
-                        Log.d(getClass().getSimpleName(), String.format("onInterceptTouchEvent: touched view overwritten, was %s, now %s", touchedView, view));
+                paramsProvider.targetView = view;
+                if (interaction.hasContact(view.getId(), hostViewContext, paramsProvider, event)) {
+                    if (contactView != null) {
+                        Log.d(getClass().getSimpleName(), String.format("onInterceptTouchEvent: contact view overwritten, was %s, now %s", contactView, view));
                     }
-
-                    touchedView = view;
+                    contactView = view;
                 }
             });
 
-            if (touchedView != null) {
-                touchedViewCenterX = touchedView.getLeft() + touchedView.getWidth() / 2f;
-                touchedViewCenterY = touchedView.getTop() + touchedView.getHeight() / 2f;
-
-                // then find distance to the center of touched view from layout center
-                float startToViewCenterVectorX = touchedViewCenterX - startX;
-                float startToViewCenterVectorY = touchedViewCenterY - startY;
-                startToTouchViewCenterDistance = Math.sqrt(startToViewCenterVectorX * startToViewCenterVectorX + startToViewCenterVectorY * startToViewCenterVectorY);
+            if (contactView != null) {
+                viewUpdatesControllerImpl = new ViewUpdatesControllerImpl(contactView);
             }
 
-            // if we touched something, then we want to receive a move event
-            return touchedView != null;
+            // if we has contact with something, then we want to receive a move event
+            return contactView != null;
         }
 
         if (event.getAction() == MotionEvent.ACTION_MOVE) {
             // so we can assume that the view is a ViewRole.Handler
             // because it's checked in on intercept method
-            if (touchedView == null) {
+            if (contactView == null) {
                 // we started to intercept touch event, so we should have touched view according to onInterceptTouchEvent
                 throw new RuntimeException("Should exist");
             }
 
-            final float touchX = event.getX();
-            final float touchY = event.getY();
-
-            // now we should calculate what degree current touch point is facing
-            // todo then get the initial degree, and interpolate from there to current by some delta time
-            float touchVectorX = touchX - startX;
-            float touchVectorY = touchY - startY;
-            double touchVectorAngle = Math.atan2(touchVectorY, touchVectorX);
-
-            // multiply that distance by final degree angle and add layout center coordinate
-            final double shiftedViewCenterX = Math.cos(touchVectorAngle) * startToTouchViewCenterDistance + startX;
-            final double shiftedViewCenterY = Math.sin(touchVectorAngle) * startToTouchViewCenterDistance + startY;
-
-            // shifted x and y subtract from touched view original x and y, those will be view new translation
-            touchedView.setTranslationX((float) (shiftedViewCenterX - touchedViewCenterX));
-            touchedView.setTranslationY((float) (shiftedViewCenterY - touchedViewCenterY));
+            interaction.updateContact(contactView.getId(), hostViewContext, viewUpdatesControllerImpl, event);
             return true;
         }
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
-//            touchedView.setTranslationY(0);
-//            touchedView.setTranslationX(0);
-            touchedView = null;
+            interaction.endContact(contactView.getId(), hostViewContext, event);
+            contactView = null;
+            hostViewContext = null;
+            viewUpdatesControllerImpl = null;
             return true;
         }
 
