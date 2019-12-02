@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/robot_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_behavior="com.mycompany.alarme.features.TimeItemCircleBehavior"
+        app:layout_drawerColor="@android:color/holo_green_dark"
+        app:layout_initialDegree="80"
+        app:srcCompat="@drawable/ic_android_black_24dp" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/robot_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_behavior="com.mycompany.alarme.features.TimeItemCircleBehavior"
+        app:layout_drawerColor="@android:color/holo_blue_dark"
+        app:layout_initialDegree="0"
+        app:srcCompat="@drawable/ic_android_black_24dp" />
+
+    <com.mycompany.alarme.features.TimeContextDrawer
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.mycompany.alarme.features.TimeContextDrawerBehavior" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

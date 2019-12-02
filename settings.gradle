@@ -1,2 +1,2 @@
-include ':app', ':views'
+include ':app', ':views', ':features'
 rootProject.name='AlarMe'
