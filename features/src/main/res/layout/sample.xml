@@ -4,13 +4,18 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
+    <com.mycompany.alarme.features.TimeContextDrawer
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.mycompany.alarme.features.TimeContextDrawerBehavior" />
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/robot_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_behavior="com.mycompany.alarme.features.TimeItemCircleBehavior"
-        app:layout_drawerColor="@android:color/holo_green_dark"
-        app:layout_initialDegree="80"
+        app:layout_drawerColor="#F30101"
+        app:layout_initialDegree="150"
         app:srcCompat="@drawable/ic_android_black_24dp" />
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -18,13 +23,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_behavior="com.mycompany.alarme.features.TimeItemCircleBehavior"
-        app:layout_drawerColor="@android:color/holo_blue_dark"
-        app:layout_initialDegree="0"
+        app:layout_degreeDistance="150"
+        app:layout_dependsOn="@id/robot_1"
+        app:layout_drawerColor="#0888F5"
+        app:layout_initialDegree="50"
         app:srcCompat="@drawable/ic_android_black_24dp" />
-
-    <com.mycompany.alarme.features.TimeContextDrawer
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="com.mycompany.alarme.features.TimeContextDrawerBehavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

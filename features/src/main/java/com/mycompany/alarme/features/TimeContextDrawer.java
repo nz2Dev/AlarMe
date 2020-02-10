@@ -26,6 +26,7 @@ public class TimeContextDrawer extends View {
     private SparseArray<TimeItemDrawerParams> paramsArray = new SparseArray<>();
     private int[] gradientColors;
     private float[] gradientPositions;
+    private TimeItemDrawerParams firstParams;
     private TimeItemDrawerParams lastParams;
 
     public TimeContextDrawer(Context context, @Nullable AttributeSet attrs) {
@@ -46,12 +47,13 @@ public class TimeContextDrawer extends View {
     }
 
     private void updateGradientState() {
-        if (paramsArray.size() < 0) {
+        if (paramsArray.size() < 2) {
             return;
         }
 
         gradientColors = new int[paramsArray.size()];
         gradientPositions = new float[paramsArray.size()];
+        firstParams = paramsArray.valueAt(0);
         lastParams = paramsArray.valueAt(0);
 
         for (int paramIndex = 0; paramIndex < paramsArray.size(); paramIndex++) {
@@ -61,6 +63,8 @@ public class TimeContextDrawer extends View {
 
             if (params.degree > lastParams.degree) {
                 lastParams = params;
+            } else if (params.degree < firstParams.degree) {
+                firstParams = params;
             }
         }
     }
@@ -94,8 +98,16 @@ public class TimeContextDrawer extends View {
             return;
         }
 
-        canvas.drawArc(arcRect, 0, (float) lastParams.degree, false, rangeArcPaint);
-        canvas.drawArc(arcRect, (float) lastParams.degree, (float) (360 - lastParams.degree), false, boundsArcPaint);
+        TimeItemDrawerParams prevParam;
+        TimeItemDrawerParams currParam;
+        for (int i = 1; i < paramsArray.size(); i++) {
+            prevParam = paramsArray.valueAt(i - 1);
+            currParam = paramsArray.valueAt(i);
+
+            canvas.drawArc(arcRect, prevParam.degree, (float) currParam.degree - prevParam.degree, false, rangeArcPaint);
+        }
+
+        canvas.drawArc(arcRect, (float) lastParams.degree, (float) 360 - (lastParams.degree - firstParams.degree), false, boundsArcPaint);
     }
 
     public static class TimeItemDrawerParams {

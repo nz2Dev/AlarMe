@@ -3,6 +3,8 @@
     <declare-styleable name="TimeItemCircleBehaviour_Layout">
         <attr name="layout_initialDegree" format="integer" />
         <attr name="layout_drawerColor" format="color|reference" />
+        <attr name="layout_dependsOn" format="reference" />
+        <attr name="layout_degreeDistance" format="reference" />
     </declare-styleable>
 
 </resources>

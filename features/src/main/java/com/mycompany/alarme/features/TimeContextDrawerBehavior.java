@@ -57,7 +57,9 @@ public class TimeContextDrawerBehavior extends CoordinatorLayout.Behavior<TimeCo
         }
 
         TimeItemCircleBehavior timeItemBehavior = Objects.requireNonNull((TimeItemCircleBehavior) ((CoordinatorLayout.LayoutParams) dependency.getLayoutParams()).getBehavior());
-        child.updateTimeItemParams(dependency.getId(), new TimeContextDrawer.TimeItemDrawerParams(timeItemBehavior.getInitialDegree(), timeItemBehavior.getDrawerColor()));
+        child.updateTimeItemParams(dependency.getId(), new TimeContextDrawer.TimeItemDrawerParams(
+                timeItemBehavior.getCurrentDegree()/*timeItemBehavior.getInitialDegree()*/,
+                timeItemBehavior.getDrawerColor()));
 
         return false;
     }
