@@ -15,7 +15,7 @@ import androidx.annotation.Nullable;
 
 public class TimeContextDrawer extends View {
 
-    public static final int ARC_STROKE_DEFAULT_VALUE = 20;
+    public static final int ARC_STROKE_DEFAULT_VALUE = 50;
 
     private int arcStrokeWidth = ARC_STROKE_DEFAULT_VALUE;
     private RectF arcRect = new RectF();
@@ -73,6 +73,7 @@ public class TimeContextDrawer extends View {
         paramsArray.append(viewId, params);
         updateGradientState();
         updateGradientShader();
+        invalidate();
     }
 
     @Override

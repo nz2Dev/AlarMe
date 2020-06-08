@@ -2,7 +2,9 @@ package com.mycompany.alarme.features;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.IdRes;
@@ -23,6 +25,10 @@ public class TimeItemCircleBehavior extends CoordinatorLayout.Behavior<View> {
     @IdRes private int dependsOnTimeItemViewId;
     private int currentDegree;
     private int degreeDistance;
+
+    private double startToTouchViewCenterDistance;
+    private float touchedViewCenterX;
+    private float touchedViewCenterY;
 
     public TimeItemCircleBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -47,6 +53,51 @@ public class TimeItemCircleBehavior extends CoordinatorLayout.Behavior<View> {
 
     public int getCurrentDegree() {
         return currentDegree;
+    }
+
+    final Rect hitRect = new Rect();
+
+    @Override
+    public boolean onInterceptTouchEvent(@NonNull CoordinatorLayout parent, @NonNull View child, @NonNull MotionEvent ev) {
+        child.getHitRect(hitRect);
+        final boolean contact = hitRect.contains((int) ev.getX(), (int) ev.getY());
+        final boolean touch = ev.getAction() == MotionEvent.ACTION_DOWN;
+
+        if (touch && contact) {
+            touchedViewCenterX = child.getLeft() + child.getWidth() / 2f;
+            touchedViewCenterY = child.getTop() + child.getHeight() / 2f;
+
+            // then find distance to the center of touched view from layout center
+            float startToViewCenterVectorX = touchedViewCenterX - parent.getWidth() / 2f;
+            float startToViewCenterVectorY = touchedViewCenterY - parent.getHeight() / 2f;
+            startToTouchViewCenterDistance = Math.sqrt(startToViewCenterVectorX * startToViewCenterVectorX + startToViewCenterVectorY * startToViewCenterVectorY);
+        }
+
+        return touch && contact;
+    }
+
+    @Override
+    public boolean onTouchEvent(@NonNull CoordinatorLayout parent, @NonNull View child, @NonNull MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_MOVE) {
+            final float touchX = ev.getX();
+            final float touchY = ev.getY();
+
+            // now we should calculate what degree current touch point is facing
+            // todo then get the initial degree, and interpolate from there to current by some delta time
+            float touchVectorX = touchX - parent.getWidth() / 2f;
+            float touchVectorY = touchY - parent.getHeight() / 2f;
+            double touchVectorAngle = Math.atan2(touchVectorY, touchVectorX);
+
+            // multiply that distance by final degree angle and add layout center coordinate
+            final double shiftedViewCenterX = Math.cos(touchVectorAngle) * startToTouchViewCenterDistance + (parent.getWidth() / 2f);
+            final double shiftedViewCenterY = Math.sin(touchVectorAngle) * startToTouchViewCenterDistance + (parent.getHeight() / 2f);
+
+            // shifted x and y subtract from touched view original x and y, those will be view new translation
+            currentDegree = (int) Math.toDegrees(touchVectorAngle);
+            child.setTranslationX((float) (shiftedViewCenterX - touchedViewCenterX));
+            child.setTranslationY((float) (shiftedViewCenterY - touchedViewCenterY));
+        }
+        return true;
     }
 
     @Override
