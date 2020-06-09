@@ -105,12 +105,18 @@ public class TimeItemCircleBehavior extends CoordinatorLayout.Behavior<View> {
         // call onTouchEvent on every behaviour after it detects that there are no behaviour that wants to intercept touch events
         // in order to find active behaviour for touch events, so it will set the first behaviour that would return true from it's onTouchEvent
         if (ev.getActionMasked() == MotionEvent.ACTION_DOWN && hasContact(child, ev)) {
+            child.dispatchTouchEvent(MotionEvent.obtain(ev));
             touchChildView(parent, child);
             return true;
         }
 
-        if (ev.getAction() == MotionEvent.ACTION_MOVE) {
+        if (ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
             translateTouchedViewBy(parent, child, ev);
+            return true;
+        }
+
+        if (ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+            child.dispatchTouchEvent(MotionEvent.obtain(ev));
             return true;
         }
 

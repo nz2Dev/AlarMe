@@ -10,14 +10,14 @@
         android:layout_height="match_parent"
         app:layout_behavior="com.mycompany.alarme.features.TimeContextDrawerBehavior" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <Button
         android:id="@+id/robot_1"
         android:layout_width="56dp"
         android:layout_height="56dp"
         app:layout_behavior="com.mycompany.alarme.features.TimeItemCircleBehavior"
         app:layout_drawerColor="#F30101"
         app:layout_initialDegree="150"
-        app:srcCompat="@drawable/ic_android_black_24dp" />
+        android:text="Robot 1" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/robot_2"
