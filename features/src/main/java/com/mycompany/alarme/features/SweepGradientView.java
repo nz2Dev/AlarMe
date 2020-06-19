@@ -75,11 +75,17 @@ public class SweepGradientView extends View {
         final Rect outRect = new Rect();
         getLocalVisibleRect(outRect);
 
-        final int minSide = Math.min(outRect.height(), outRect.width());
+        final int minSide = Math.min(outRect.height(),
+                outRect.width()) - (int) gradientPaint.getStrokeWidth();
+
         outRect.set(outRect.centerX() - minSide / 2,
                 outRect.centerY() - minSide / 2,
                 outRect.centerX() + minSide / 2,
                 outRect.centerY() + minSide / 2);
+        outRect.set(outRect.left + getPaddingLeft(),
+                outRect.top + getPaddingTop(),
+                outRect.right - getPaddingRight(),
+                outRect.bottom - getPaddingBottom());
 
         gradientRect.set(outRect);
         setGradient(builderCache);
@@ -88,7 +94,6 @@ public class SweepGradientView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawRect(0, 0, getWidth(), getHeight(), gradientPaint);
         canvas.drawArc(gradientRect, 0, 360, false, gradientPaint);
     }
 
