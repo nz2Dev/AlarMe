@@ -28,6 +28,7 @@ dependencies {
     implementation rootProject.ext.appCompat
     implementation rootProject.ext.constraintLayout
     implementation rootProject.ext.coordinatorLayout
+    implementation rootProject.ext.rxJava2
 
     testImplementation rootProject.ext.testingJUnit
 
