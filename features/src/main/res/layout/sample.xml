@@ -8,16 +8,16 @@
     <com.mycompany.alarme.features.SweepGradientView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior=".TimeRangeSweepGradientBehaviour" />
+        app:layout_behavior="com.mycompany.alarme.features.TimeRangeSweepGradientBehaviour" />
 
     <Button
         android:id="@+id/robot_1"
-        android:layout_width="56dp"
+        android:layout_width="wrap_content"
         android:layout_height="56dp"
         app:layout_behavior="com.mycompany.alarme.features.CircleSectionContributorBehaviour"
         app:layout_drawerColor="#F30101"
         app:layout_initialDegree="150"
-        android:text="Robot 1" />
+        android:text="Start" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/robot_2"

@@ -31,13 +31,9 @@ public class SweepGradientView extends View {
         gradientPaint.setStyle(Paint.Style.STROKE);
 
         if (isInEditMode()) {
-            setGradientStartDegree(35);
             setGradient(new SweepGradientBuilder()
-                    .addCircular(0, Color.RED)
                     .addCircular(90, Color.GREEN)
-                    .addCircular(90, Color.WHITE)
-                    .addCircular(135, Color.BLUE)
-                    .addCircular(360, Color.WHITE));
+                    .addCircular(135, Color.BLUE));
         }
     }
 
@@ -51,6 +47,8 @@ public class SweepGradientView extends View {
             gradient.setLocalMatrix(gradientLocalMatrix);
             gradientPaint.setShader(gradient);
         }
+
+        invalidate();
     }
 
     public void setGradientStartDegree(int degree) {
@@ -88,7 +86,10 @@ public class SweepGradientView extends View {
                 outRect.bottom - getPaddingBottom());
 
         gradientRect.set(outRect);
-        setGradient(builderCache);
+
+        if (builderCache != null) {
+            setGradient(builderCache);
+        }
     }
 
     @Override

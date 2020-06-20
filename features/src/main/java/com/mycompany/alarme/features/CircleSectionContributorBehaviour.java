@@ -76,9 +76,10 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
         final double shiftedViewCenterY = Math.sin(touchVectorAngle) * startToTouchViewCenterDistance + (parent.getHeight() / 2f);
 
         // shifted x and y subtract from touched view original x and y, those will be view new translation
-        currentDegree = (int) Math.toDegrees(touchVectorAngle);
         child.setTranslationX((float) (shiftedViewCenterX - touchedViewCenterX));
         child.setTranslationY((float) (shiftedViewCenterY - touchedViewCenterY));
+
+        currentDegree = CircleSectionUtils.to360Range((int) Math.toDegrees(touchVectorAngle));
     }
 
     @Override
@@ -158,7 +159,7 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
         int startY = childRadius;
 
         final CircleSectionContributorBehaviour dependentBehaviour = requireNonNull(getViewBehaviorAsTimeItem(dependency));
-        currentDegree = dependentBehaviour.getCurrentDegree() - degreeDistance;
+        currentDegree = CircleSectionUtils.to360Range(dependentBehaviour.getCurrentDegree() - degreeDistance);
         final double newAngle = Math.toRadians(currentDegree);
         final int dependenciesCenterX = dependency.getLeft() + dependency.getWidth() / 2;
         final int dependenciesCenterY = dependency.getTop() + dependency.getHeight() / 2;
