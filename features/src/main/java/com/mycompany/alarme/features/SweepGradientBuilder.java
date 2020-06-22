@@ -2,22 +2,23 @@ package com.mycompany.alarme.features;
 
 import android.graphics.SweepGradient;
 
-import androidx.core.math.MathUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observable;
 
 public class SweepGradientBuilder {
 
     private List<Item> items = new ArrayList<>();
 
-    public SweepGradientBuilder add(float position, int color) {
-        items.add(new Item(position, color));
+    public SweepGradientBuilder addSection(int degree, int color) {
+        items.add(new Item(degree, color));
         return this;
     }
 
-    public SweepGradientBuilder addCircular(int degree, int color) {
-        return add(MathUtils.clamp(degree, 0, 360) / 360f, color);
+    public SweepGradientBuilder addSection(Item item) {
+        items.add(item);
+        return this;
     }
 
     SweepGradientBuilder copy() {
@@ -27,23 +28,46 @@ public class SweepGradientBuilder {
     }
 
     SweepGradient build(float cx, float cy) {
-        int[] colors = new int[items.size()];
-        float[] positions = new float[items.size()];
-        for (int i = 0; i < items.size(); i++) {
-            colors[i] = items.get(i).color;
-            positions[i] = items.get(i).position;
-        }
+        final int[] colors = new int[items.size()];
+        final float[] positions = new float[items.size()];
+
+        Observable.fromIterable(items)
+                .sorted((o1, o2) -> o1.getRotation() - o2.getRotation())
+                .zipWith(Observable.range(0, items.size()), (item, index) -> {
+                    positions[index] = item.getPosition();
+                    colors[index] = item.getColor();
+                    return index;
+                })
+                .ignoreElements()
+                .blockingAwait();
+
         return new SweepGradient(cx, cy, colors, positions);
     }
 
     public static class Item {
 
-        private float position;
+        private int rotation;
         private int color;
 
-        public Item(float position, int color) {
-            this.position = position;
+        public Item(int rotation, int color) {
             this.color = color;
+            setRotation(rotation);
+        }
+
+        public void setRotation(int rotation) {
+            this.rotation = CircleSectionUtils.to360Range(rotation);
+        }
+
+        public int getRotation() {
+            return rotation;
+        }
+
+        private float getPosition() {
+            return rotation / 360f;
+        }
+
+        public int getColor() {
+            return color;
         }
     }
 

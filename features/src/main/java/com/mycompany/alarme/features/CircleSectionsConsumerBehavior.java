@@ -81,12 +81,21 @@ public abstract class CircleSectionsConsumerBehavior<V extends View> extends Coo
     protected abstract void onContributorsDataChanged(Set<SectionData> sectionsDataSet, V child);
 
     public static class SectionData {
+
         public final int sectionViewId;
-        public int rotation;
-        public int color;
+        private int rotation;
+        private int color;
 
         public SectionData(int sectionViewId) {
             this.sectionViewId = sectionViewId;
+        }
+
+        public int getRotation() {
+            return rotation;
+        }
+
+        public int getColor() {
+            return color;
         }
     }
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
 
+import java.util.List;
 import java.util.Set;
 
 import io.reactivex.Observable;
@@ -20,16 +21,28 @@ public class TimeRangeSweepGradientBehaviour extends CircleSectionsConsumerBehav
             return;
         }
 
-        child.setGradientStartDegree(0);
-        child.setGradient(Observable.fromIterable(sectionsDataSet)
-                .sorted((s1, s2) -> s1.rotation - s2.rotation)
-                .collectInto(new SweepGradientBuilder(), (gb, section) -> gb.addCircular(section.rotation, section.color))
-                .flatMap(gradientBuilder -> {
+        final List<SweepGradientBuilder.Item> processedSections = Observable
+                .fromIterable(sectionsDataSet)
+                .firstOrError()
+                .flatMapObservable(forwardSection -> {
+                    final int initialRotation = forwardSection.getRotation();
+                    child.setGradientStartDegree(initialRotation);
                     return Observable.fromIterable(sectionsDataSet)
-                            .sorted((s1, s2) -> s1.rotation - s2.rotation)
-                            .lastElement()
-                            .map(lastSection -> gradientBuilder.addCircular(lastSection.rotation, Color.TRANSPARENT))
-                            .toSingle(gradientBuilder);
+                            .map(section -> new SweepGradientBuilder.Item(section.getRotation(), section.getColor()))
+                            .doOnNext(item -> item.setRotation(item.getRotation() - initialRotation));
+                })
+                .sorted((o1, o2) -> o1.getRotation() - o2.getRotation())
+                .toList()
+                .blockingGet();
+
+        child.setGradient(Observable.fromIterable(processedSections)
+                .collect(SweepGradientBuilder::new, SweepGradientBuilder::addSection)
+                .doOnSuccess(builder -> {
+                    final SweepGradientBuilder.Item lastItem =
+                            processedSections.get(processedSections.size() - 1);
+
+                    builder.addSection(
+                            lastItem.getRotation(), Color.TRANSPARENT);
                 })
                 .blockingGet());
     }
