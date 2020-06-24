@@ -34,7 +34,7 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
         currentDegree = typedArray.getInteger(R.styleable.TimeItemCircleBehaviour_Layout_layout_initialDegree, 0);
         drawerColor = typedArray.getColor(R.styleable.TimeItemCircleBehaviour_Layout_layout_drawerColor, 0);
         dependsOnContributorChild = typedArray.getResourceId(R.styleable.TimeItemCircleBehaviour_Layout_layout_dependsOn, 0);
-        degreeDistance = typedArray.getInt(R.styleable.TimeItemCircleBehaviour_Layout_layout_degreeDistance, 10);
+        degreeDistance = typedArray.getInt(R.styleable.TimeItemCircleBehaviour_Layout_layout_degreeDistance, -1);
         typedArray.recycle();
     }
 
@@ -84,7 +84,18 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
         child.setTranslationX((float) (shiftedViewCenterX - touchedViewCenterX));
         child.setTranslationY((float) (shiftedViewCenterY - touchedViewCenterY));
 
-        currentDegree = CircleSectionUtils.to360Range((int) Math.toDegrees(touchVectorAngle));
+        rotateTo(parent, (int) Math.toDegrees(touchVectorAngle));
+    }
+
+    private void rotateTo(CoordinatorLayout parent, int degree) {
+        currentDegree = CircleSectionUtils.to360Range(degree);
+
+        if (dependsOnContributorChild != 0) {
+            CircleSectionContributorBehaviour dependentBehaviour = getViewBehaviorAsTimeItem(parent.findViewById(dependsOnContributorChild));
+            if (dependentBehaviour != null) {
+                degreeDistance = dependentBehaviour.getCurrentDegree() - currentDegree;
+            }
+        }
     }
 
     @Override
@@ -135,6 +146,10 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
 
     @Override
     public boolean onLayoutChild(@NonNull CoordinatorLayout parent, @NonNull View child, int layoutDirection) {
+        if (degreeDistance == -1) {
+            rotateTo(parent, currentDegree);
+        }
+
         int startX = childRadius;
         int startY = childRadius;
 

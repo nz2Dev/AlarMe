@@ -16,7 +16,7 @@
         android:layout_height="56dp"
         app:layout_behavior="com.mycompany.alarme.features.CircleSectionContributorBehaviour"
         app:layout_drawerColor="#F30101"
-        app:layout_initialDegree="40"
+        app:layout_initialDegree="90"
         android:text="Start" />
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -24,10 +24,9 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         app:layout_behavior="com.mycompany.alarme.features.CircleSectionContributorBehaviour"
-        app:layout_degreeDistance="90"
-        app:layout_dependsOn="@id/robot_1"
         app:layout_drawerColor="#0888F5"
-        app:layout_initialDegree="50"
+        app:layout_dependsOn="@id/robot_1"
+        app:layout_initialDegree="20"
         app:srcCompat="@drawable/ic_android_black_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
