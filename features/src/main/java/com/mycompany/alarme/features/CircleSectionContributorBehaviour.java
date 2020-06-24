@@ -19,7 +19,7 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
     private final int drawerColor;
 
     private int childRadius;
-    @IdRes private int dependsOnTimeItemViewId;
+    @IdRes private int dependsOnContributorChild;
     private int currentDegree;
     private int degreeDistance;
 
@@ -33,7 +33,7 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
         final TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TimeItemCircleBehaviour_Layout);
         currentDegree = typedArray.getInteger(R.styleable.TimeItemCircleBehaviour_Layout_layout_initialDegree, 0);
         drawerColor = typedArray.getColor(R.styleable.TimeItemCircleBehaviour_Layout_layout_drawerColor, 0);
-        dependsOnTimeItemViewId = typedArray.getResourceId(R.styleable.TimeItemCircleBehaviour_Layout_layout_dependsOn, 0);
+        dependsOnContributorChild = typedArray.getResourceId(R.styleable.TimeItemCircleBehaviour_Layout_layout_dependsOn, 0);
         degreeDistance = typedArray.getInt(R.styleable.TimeItemCircleBehaviour_Layout_layout_degreeDistance, 10);
         typedArray.recycle();
     }
@@ -44,6 +44,11 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
 
     public int getCurrentDegree() {
         return currentDegree;
+    }
+
+    @IdRes
+    public int getDependsOnContributorChild() {
+        return dependsOnContributorChild;
     }
 
     private boolean hasContact(View child, MotionEvent ev) {
@@ -148,9 +153,9 @@ public class CircleSectionContributorBehaviour extends CoordinatorLayout.Behavio
 
     @Override
     public boolean layoutDependsOn(@NonNull CoordinatorLayout parent, @NonNull View child, @NonNull View dependency) {
-        return dependsOnTimeItemViewId != 0
+        return dependsOnContributorChild != 0
                 && getViewBehaviorAsTimeItem(dependency) != null
-                && dependency.getId() == dependsOnTimeItemViewId;
+                && dependency.getId() == dependsOnContributorChild;
     }
 
     @Override

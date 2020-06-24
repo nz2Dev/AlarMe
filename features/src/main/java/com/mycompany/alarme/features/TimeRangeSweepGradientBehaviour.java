@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 
 import java.util.List;
-import java.util.Set;
 
 import io.reactivex.Observable;
 
@@ -16,35 +15,57 @@ public class TimeRangeSweepGradientBehaviour extends CircleSectionsConsumerBehav
     }
 
     @Override
-    protected void onContributorsDataChanged(Set<SectionData> sectionsDataSet, SweepGradientView child) {
-        if (sectionsDataSet.size() < 2) {
-            return;
-        }
-
-        final List<SweepGradientBuilder.Item> processedSections = Observable
-                .fromIterable(sectionsDataSet)
-                .firstOrError()
-                .flatMapObservable(forwardSection -> {
-                    final int initialRotation = forwardSection.getRotation();
-                    child.setGradientStartDegree(initialRotation);
-                    return Observable.fromIterable(sectionsDataSet)
-                            .map(section -> new SweepGradientBuilder.Item(section.getRotation(), section.getColor()))
-                            .doOnNext(item -> item.setRotation(item.getRotation() - initialRotation));
-                })
-                .sorted((o1, o2) -> o1.getRotation() - o2.getRotation())
+    protected void onContributorsDataChanged(List<SectionData> sections, SweepGradientView child) {
+        final List<SectionData> sequentialSections = Observable.fromIterable(sections)
+                .map(SectionSegmentWrapper::new)
                 .toList()
+                .map(wrappers -> new SegmentsLinker().linkInOrder(wrappers))
+                .flattenAsObservable(ordered -> ordered)
+                .map(wrapper -> ((SectionSegmentWrapper) wrapper).sectionData)
+                .toList()
+                .blockingGet();
+
+        onSequentialSectionsChanged(sequentialSections, child);
+    }
+
+    protected void onSequentialSectionsChanged(List<SectionData> sequentialSections, SweepGradientView child) {
+        if (sequentialSections.size() < 2)
+            return;
+
+        final int initialRotation = sequentialSections.get(0).getRotation();
+        child.setGradientStartDegree(initialRotation);
+        final List<SweepGradientBuilder.Item> processedSections = Observable.fromIterable(sequentialSections)
+                .map(section -> new SweepGradientBuilder.Item(section.getRotation(), section.getColor()))
+                .doOnNext(item -> item.setRotation(item.getRotation() - initialRotation))
+                .toSortedList((o1, o2) -> o1.getRotation() - o2.getRotation())
                 .blockingGet();
 
         child.setGradient(Observable.fromIterable(processedSections)
                 .collect(SweepGradientBuilder::new, SweepGradientBuilder::addSection)
                 .doOnSuccess(builder -> {
-                    final SweepGradientBuilder.Item lastItem =
-                            processedSections.get(processedSections.size() - 1);
-
-                    builder.addSection(
-                            lastItem.getRotation(), Color.TRANSPARENT);
+                    final int lastItemRotation = processedSections.get(processedSections.size() - 1).getRotation();
+                    builder.addSection(lastItemRotation, Color.TRANSPARENT);
                 })
                 .blockingGet());
+    }
+
+    static class SectionSegmentWrapper implements SegmentsLinker.Segment {
+        private SectionData sectionData;
+        SectionSegmentWrapper(SectionData sectionData) {
+            this.sectionData = sectionData;
+        }
+        @Override
+        public int anchor() {
+            return sectionData.getSectionViewId();
+        }
+
+        @Override
+        public int dependency() {
+            return sectionData.getDependsOnViewId();
+        }
+        public SectionData getSectionData() {
+            return sectionData;
+        }
     }
 
 }
